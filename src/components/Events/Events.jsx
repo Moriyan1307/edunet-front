@@ -1,9 +1,14 @@
+// Name - Usha Sai Chintha, UTA ID - 1002155333
+// Name - Shiney Chinthamalla, UTA ID - 1002170536
+// Name - Sai Charan Challa, UTA ID - 1002147720
+// Name - Venkata Satya Kiranmai Challagulla, UTA ID - 1002195499
+// Name - Dinesh Reddy Bommana, UTA ID - 1002163421
+
 import React, { useState } from "react";
 import { Card, CardContent, Typography } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
 
-// Sample events data
 const events = [
   {
     id: 1,
@@ -14,7 +19,7 @@ const events = [
     description: "Learn the basics of React",
     speaker: "John Doe",
     additionalInfo: "Bring your laptop and install Node.js beforehand.",
-    image: "/react_workshop.svg", // Image for React Workshop
+    image: "/react_workshop.svg",
   },
   {
     id: 2,
@@ -25,7 +30,7 @@ const events = [
     description: "Exploring the future of AI",
     speaker: "Jane Smith",
     additionalInfo: "Discuss how AI will shape the next decade.",
-    image: "/ai_seminar.svg", // Image for AI Seminar
+    image: "/ai_seminar.svg",
   },
   {
     id: 3,
@@ -36,7 +41,7 @@ const events = [
     description: "Hands-on UX design techniques",
     speaker: "Emily Johnson",
     additionalInfo: "Workshop focuses on user-centered design practices.",
-    image: "/ux_workshop.svg", // Image for UX Design Workshop
+    image: "/ux_workshop.svg",
   },
   {
     id: 4,
@@ -47,7 +52,7 @@ const events = [
     description: "Latest trends in cybersecurity",
     speaker: "Michael Lee",
     additionalInfo: "Learn about emerging cybersecurity threats and defenses.",
-    image: "/cybersecurity_seminar.svg", // Image for Cybersecurity Seminar
+    image: "/cybersecurity_seminar.svg",
   },
 ];
 

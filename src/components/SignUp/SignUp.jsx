@@ -1,3 +1,9 @@
+// Name - Usha Sai Chintha, UTA ID - 1002155333
+// Name - Shiney Chinthamalla, UTA ID - 1002170536
+// Name - Sai Charan Challa, UTA ID - 1002147720
+// Name - Venkata Satya Kiranmai Challagulla, UTA ID - 1002195499
+// Name - Dinesh Reddy Bommana, UTA ID - 1002163421
+
 import React, { useState } from "react";
 
 const SignUpForm = () => {
@@ -11,16 +17,17 @@ const SignUpForm = () => {
     occupation: "",
     major: "",
     graduationYear: "",
+    university: "",
     interests: "",
   });
 
   const [formErrors, setFormErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleTogglePassword = () => setShowPassword(!showPassword);
-  const handleToggleConfirmPassword = () =>
-    setShowConfirmPassword(!showConfirmPassword);
+  const handleToggleConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,29 +36,51 @@ const SignUpForm = () => {
 
   const validateForm = () => {
     let errors = {};
-    // All fields required validation
-    if (!formData.firstName) errors.firstName = "First Name is required";
-    if (!formData.lastName) errors.lastName = "Last Name is required";
+
+    // Name fields validation
+    const namePattern = /^[A-Za-z]+$/;
+    if (!formData.firstName) {
+      errors.firstName = "First Name is required";
+    } else if (!namePattern.test(formData.firstName)) {
+      errors.firstName = "First Name should not contain numbers or special characters";
+    }
+
+    if (!formData.lastName) {
+      errors.lastName = "Last Name is required";
+    } else if (!namePattern.test(formData.lastName)) {
+      errors.lastName = "Last Name should not contain numbers or special characters";
+    }
+
+    // Email validation
     if (!formData.email) {
       errors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       errors.email = "Email is invalid";
     }
+
+    // Password validation
     if (!formData.password) {
       errors.password = "Password is required";
     } else if (formData.password.length < 6) {
       errors.password = "Password must be at least 6 characters long";
     }
+
     if (!formData.confirmPassword) {
       errors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
       errors.confirmPassword = "Passwords do not match";
     }
+
+    // Other fields validation
     if (!formData.phone) errors.phone = "Phone number is required";
     if (!formData.occupation) errors.occupation = "Occupation is required";
-    if (!formData.major) errors.major = "Major is required";
-    if (!formData.graduationYear)
-      errors.graduationYear = "Graduation year is required";
+
+    if (formData.occupation === "Student" || formData.occupation === "Alumni") {
+      if (!formData.major) errors.major = "Major is required";
+      if (!formData.graduationYear) errors.graduationYear = "Graduation year is required";
+      if (!formData.university) errors.university = "University name is required";
+    }
+
     if (!formData.interests) errors.interests = "Interests are required";
 
     return errors;
@@ -62,7 +91,30 @@ const SignUpForm = () => {
     const errors = validateForm();
     if (Object.keys(errors).length === 0) {
       console.log("Form Submitted", formData);
-      // Proceed with form submission logic here
+
+      // Set success message
+      setSuccessMessage("Registration completed successfully!");
+
+      // Clear the form data and errors after successful submission
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        phone: "",
+        occupation: "",
+        major: "",
+        graduationYear: "",
+        university: "",
+        interests: "",
+      });
+      setFormErrors({});
+
+      // Clear success message after a few seconds
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
     } else {
       setFormErrors(errors);
     }
@@ -71,6 +123,14 @@ const SignUpForm = () => {
   return (
     <div className="max-w-lg mx-auto p-8 border border-gray-300 rounded-md">
       <h2 className="text-2xl font-bold mb-6">Register</h2>
+
+      {/* Display success message if available */}
+      {successMessage && (
+        <p className="bg-green-100 text-green-800 p-2 rounded-md mb-4 text-center">
+          {successMessage}
+        </p>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -83,9 +143,7 @@ const SignUpForm = () => {
               className="w-full px-3 py-2 border rounded-md"
             />
             {formErrors.firstName && (
-              <p className="text-red-500 text-sm mt-1">
-                {formErrors.firstName}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{formErrors.firstName}</p>
             )}
           </div>
           <div>
@@ -155,9 +213,7 @@ const SignUpForm = () => {
               👁️
             </button>
             {formErrors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">
-                {formErrors.confirmPassword}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{formErrors.confirmPassword}</p>
             )}
           </div>
         </div>
@@ -174,33 +230,6 @@ const SignUpForm = () => {
           <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            name="major"
-            placeholder="Major"
-            value={formData.major}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md"
-          />
-          {formErrors.major && (
-            <p className="text-red-500 text-sm mt-1">{formErrors.major}</p>
-          )}
-          <input
-            type="text"
-            name="graduationYear"
-            placeholder="Graduation Year"
-            value={formData.graduationYear}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md"
-          />
-          {formErrors.graduationYear && (
-            <p className="text-red-500 text-sm mt-1">
-              {formErrors.graduationYear}
-            </p>
-          )}
-        </div>
-
         <select
           name="occupation"
           value={formData.occupation}
@@ -209,11 +238,51 @@ const SignUpForm = () => {
         >
           <option value="">Occupation</option>
           <option value="Student">Student</option>
-          <option value="Professional">Professional</option>
-          <option value="Other">Other</option>
+          <option value="Alumni">Alumni</option>
+          <option value="Mentor">Mentor</option>
         </select>
         {formErrors.occupation && (
           <p className="text-red-500 text-sm mt-1">{formErrors.occupation}</p>
+        )}
+
+        {(formData.occupation === "Student" || formData.occupation === "Alumni") && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                type="text"
+                name="major"
+                placeholder="Major"
+                value={formData.major}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+              {formErrors.major && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.major}</p>
+              )}
+              <input
+                type="text"
+                name="graduationYear"
+                placeholder="Graduation Year"
+                value={formData.graduationYear}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+              {formErrors.graduationYear && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.graduationYear}</p>
+              )}
+            </div>
+            <input
+              type="text"
+              name="university"
+              placeholder="University Name"
+              value={formData.university}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md"
+            />
+            {formErrors.university && (
+              <p className="text-red-500 text-sm mt-1">{formErrors.university}</p>
+            )}
+          </>
         )}
 
         <input

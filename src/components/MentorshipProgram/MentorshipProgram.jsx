@@ -1,3 +1,9 @@
+// Name - Usha Sai Chintha, UTA ID - 1002155333
+// Name - Shiney Chinthamalla, UTA ID - 1002170536
+// Name - Sai Charan Challa, UTA ID - 1002147720
+// Name - Venkata Satya Kiranmai Challagulla, UTA ID - 1002195499
+// Name - Dinesh Reddy Bommana, UTA ID - 1002163421
+
 import React from 'react';
 import PersonIcon from "@mui/icons-material/Person";
 
@@ -6,30 +12,30 @@ const mentorshipData = [
     id: 1,
     title: "Learn React with best mentor from industry",
     mentor: "Usha Sai",
-    imageUrl: "/react_workshop.svg", // Replace with actual image path
+    imageUrl: "/react_workshop.svg",
   },
   {
     id: 2,
     title: "Learn React with best mentor from industry",
     mentor: "Usha Sai",
-    imageUrl: "/react_workshop.svg", // Replace with actual image path
+    imageUrl: "/react_workshop.svg",
   },
   {
     id: 3,
     title: "Learn React with best mentor from industry",
     mentor: "Usha Sai",
-    imageUrl: "/react_workshop.svg", // Replace with actual image path
+    imageUrl: "/react_workshop.svg",
   },
   {
       id: 4,
       title: "Learn React with best mentor from industry",
       mentor: "Usha Sai",
-      imageUrl: "/react_workshop.svg", // Replace with actual image path
+      imageUrl: "/react_workshop.svg",
   },
 ];
 
 const MentorshipProgram = ({ onEnroll }) => {
-  const placeholderImage = "path/to/placeholder/image"; // Replace with actual placeholder image
+  const placeholderImage = "path/to/placeholder/image";
 
   return (
     <div className="h-full w-full p-6 bg-white">

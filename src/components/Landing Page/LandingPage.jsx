@@ -1,3 +1,9 @@
+// Name - Usha Sai Chintha, UTA ID - 1002155333
+// Name - Shiney Chinthamalla, UTA ID - 1002170536
+// Name - Sai Charan Challa, UTA ID - 1002147720
+// Name - Venkata Satya Kiranmai Challagulla, UTA ID - 1002195499
+// Name - Dinesh Reddy Bommana, UTA ID - 1002163421
+
 import Link from "next/link";
 
 export default function LandingPage() {
@@ -10,22 +16,6 @@ export default function LandingPage() {
         A networking platform designed for university students to connect,
         collaborate, and succeed.
       </p>
-
-      {/* <div className="flex space-x-6">
-        <Link
-          href="/signup"
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition duration-300"
-        >
-          Sign Up
-        </Link>
-
-        <Link
-          href="/login"
-          className="bg-gray-800 text-white px-6 py-3 rounded-lg text-lg hover:bg-gray-900 transition duration-300"
-        >
-          Log In
-        </Link>
-      </div> */}
 
       <div className="mt-12">
         <h2 className="text-2xl font-semibold text-gray-800">Why EduNet?</h2>

@@ -1,10 +1,15 @@
-// app/login/page.js
+// Name - Usha Sai Chintha, UTA ID - 1002155333
+// Name - Shiney Chinthamalla, UTA ID - 1002170536
+// Name - Sai Charan Challa, UTA ID - 1002147720
+// Name - Venkata Satya Kiranmai Challagulla, UTA ID - 1002195499
+// Name - Dinesh Reddy Bommana, UTA ID - 1002163421
+
 "use client";
 
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { setSignIn } from "../../app/redux/slices/authSlice"; // Adjust the path
-import { useRouter } from "next/navigation"; // Use for navigation in Next.js app router
+import { setSignIn } from "../../app/redux/slices/authSlice";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -53,17 +58,17 @@ export default function LoginForm() {
         router.push("/");
         dispatch(setSignIn("student"));
       } else if (
-        formData.email === "professor@uta.com" &&
+        formData.email === "mentor@uta.com" &&
         formData.password === "password"
       ) {
         router.push("/");
-        dispatch(setSignIn("professor"));
+        dispatch(setSignIn("mentor"));
       } else if (
-        formData.email === "admin@uta.com" &&
+        formData.email === "alumni@uta.com" &&
         formData.password === "password"
       ) {
         router.push("/");
-        dispatch(setSignIn("admin"));
+        dispatch(setSignIn("alumni"));
       } else {
         setIsInvalid(true);
       }
