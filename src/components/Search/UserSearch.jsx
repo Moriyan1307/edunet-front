@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation"; // Import the Next.js router
 import axiosInstance from "../../utils/axiosInstance";
 
 const UserSearch = () => {
@@ -8,11 +10,13 @@ const UserSearch = () => {
   const [noResults, setNoResults] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Function to handle searching users
+  const currentUserId = useSelector((state) => state.auth.user.user_id);
+  const router = useRouter(); // Use router for navigation
+
   const handleSearch = async () => {
     if (searchTerm.trim() === "") {
-      setSearchResults([]); // Clear previous results
-      setNoResults(false); // Reset no results message
+      setSearchResults([]);
+      setNoResults(false);
       return;
     }
 
@@ -33,7 +37,6 @@ const UserSearch = () => {
     }
   };
 
-  // Handle opening and closing dropdown
   const handleFocus = () => {
     setIsDropdownOpen(true);
   };
@@ -44,25 +47,23 @@ const UserSearch = () => {
     }
   };
 
-  // Handle input change
-  const handleInputChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    if (value.trim() === "") {
-      setSearchResults([]);
-      setNoResults(false);
-    } else {
-      handleSearch();
-    }
-  };
-
-  // Handle starting a conversation
+  // Start a conversation with a user
   const startConversation = async (userId) => {
     try {
-      await axiosInstance.post("/conversations/start-one-on-one", {
-        user_id: userId,
-      });
-      alert(`Conversation started with user ID: ${userId}`);
+      const response = await axiosInstance.post(
+        "/conversations/start-one-on-one",
+        {
+          user_id: userId,
+          current_user_id: currentUserId,
+        }
+      );
+      // Clear search term, search results, and close dropdown
+      setSearchTerm("");
+      setSearchResults([]);
+      setIsDropdownOpen(false);
+
+      // Redirect to networking page after starting conversation
+      router.push("/networking");
     } catch (error) {
       console.error("Error starting conversation:", error);
     }
@@ -73,7 +74,16 @@ const UserSearch = () => {
       <input
         type="text"
         value={searchTerm}
-        onChange={handleInputChange}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          if (e.target.value.trim() === "") {
+            // Clear results if input is empty
+            setSearchResults([]);
+            setNoResults(false);
+          } else {
+            handleSearch();
+          }
+        }}
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder="Search..."
@@ -90,6 +100,7 @@ const UserSearch = () => {
                 <li
                   key={user.user_id}
                   className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onMouseDown={() => startConversation(user.user_id)}
                 >
                   <img
                     src={user.image_url}
@@ -103,7 +114,10 @@ const UserSearch = () => {
                     <p className="text-sm text-gray-500">{user.email}</p>
                   </div>
                   <button
-                    onClick={() => startConversation(user.user_id)}
+                    onClick={(e) => {
+                      e.preventDefault(); // Prevent dropdown close on click
+                      startConversation(user.user_id);
+                    }}
                     className="bg-blue-500 text-white px-3 py-1 rounded-md"
                   >
                     Chat

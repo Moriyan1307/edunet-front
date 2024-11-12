@@ -1,24 +1,52 @@
 "use client";
 
-const MessageInput = () => {
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import axiosInstance from "../../utils/axiosInstance";
+
+const MessageInput = ({ conversationId, onMessageSent }) => {
+  const [message, setMessage] = useState("");
+  const currentUserId = useSelector((state) => state.auth.user.user_id);
+
+  const sendMessage = async () => {
+    if (message.trim() === "" || !conversationId) return;
+
+    try {
+      await axiosInstance.post("/messages", {
+        conversationId,
+        senderId: currentUserId,
+        content: message,
+      });
+
+      onMessageSent({
+        sender_id: currentUserId,
+        content: message,
+        sent_at: new Date().toISOString(),
+      });
+
+      setMessage(""); // Clear input field after sending
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+  };
+
   return (
     <div className="flex items-center p-4 bg-white border-t">
-      <button className="mr-2">
-        <svg
-          className="w-6 h-6 text-gray-500"
-          fill="currentColor"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-        >
-          <path fillRule="evenodd" d="M19 6l-7 7-7-7" />
-        </svg>
-      </button>
       <input
         type="text"
         placeholder="Type a message"
         className="flex-grow px-4 py-2 border rounded-full focus:outline-none"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        onKeyPress={handleKeyPress}
       />
-      <button className="ml-2">
+      <button className="ml-2" onClick={sendMessage}>
         <svg
           className="w-6 h-6 text-gray-500"
           fill="currentColor"

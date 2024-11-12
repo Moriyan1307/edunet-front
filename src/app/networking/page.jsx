@@ -9,10 +9,25 @@ import ForumComponent from "../../components/Forum/Forum";
 
 const Networking = () => {
   const [activeTab, setActiveTab] = useState("chat"); // 'chat' or 'forum'
+  const [activeConversationId, setActiveConversationId] = useState(null); // New state for active conversation
+  const [messages, setMessages] = useState([]);
+
+  // Update messages when a new message is sent
+  const handleNewMessage = (newMessage) => {
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  };
+
+  // Change active conversation
+  const handleConversationChange = (conversationId) => {
+    setActiveConversationId(conversationId);
+    setMessages([]); // Clear messages when switching conversations
+  };
 
   return (
     <div className="h-full flex">
-      {activeTab === "chat" && <ChatList />}
+      {activeTab === "chat" && (
+        <ChatList onConversationChange={handleConversationChange} />
+      )}
       <div
         className={`flex flex-col ${
           activeTab === "forum" ? "w-full" : "flex-grow"
@@ -24,8 +39,20 @@ const Networking = () => {
         />
         {activeTab === "chat" ? (
           <>
-            <ChatWindow />
-            <MessageInput />
+            {activeConversationId ? (
+              <>
+                <ChatWindow
+                  conversationId={activeConversationId}
+                  messages={messages}
+                />
+                <MessageInput
+                  conversationId={activeConversationId}
+                  onMessageSent={handleNewMessage}
+                />
+              </>
+            ) : (
+              <p className="p-4">Select a conversation to start chatting.</p>
+            )}
           </>
         ) : (
           <ForumComponent />
