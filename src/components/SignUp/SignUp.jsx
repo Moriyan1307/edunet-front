@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axiosInstance from "../../utils/axiosInstance"; // Ensure you have a configured axios instance
 
 const SignUpForm = () => {
   const [formData, setFormData] = useState({
@@ -7,7 +8,7 @@ const SignUpForm = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    phone: "",
+    phone: "", // Initialize as an empty string
     occupation: "",
     major: "",
     graduationYear: "",
@@ -15,6 +16,7 @@ const SignUpForm = () => {
   });
 
   const [formErrors, setFormErrors] = useState({});
+  const [isRegistered, setIsRegistered] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -29,7 +31,6 @@ const SignUpForm = () => {
 
   const validateForm = () => {
     let errors = {};
-    // All fields required validation
     if (!formData.firstName) errors.firstName = "First Name is required";
     if (!formData.lastName) errors.lastName = "Last Name is required";
     if (!formData.email) {
@@ -57,12 +58,32 @@ const SignUpForm = () => {
     return errors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validateForm();
     if (Object.keys(errors).length === 0) {
-      console.log("Form Submitted", formData);
-      // Proceed with form submission logic here
+      try {
+        // Send a POST request to the backend API
+        const response = await axiosInstance.post("/users/register", {
+          f_name: formData.firstName,
+          l_name: formData.lastName,
+          email: formData.email,
+          password: formData.password, // Assuming backend will hash the password
+          phone_number: formData.phone.toString(), // Convert to string if needed
+          image_url: "https://example.com/static-image.jpg", // Static image URL
+          occupation: formData.occupation,
+          major: formData.major,
+          graduation_year: formData.graduationYear,
+          interests: formData.interests,
+        });
+        console.log("Registration successful:", response.data);
+        setIsRegistered(true);
+      } catch (error) {
+        console.error(
+          "Registration failed:",
+          error.response?.data || error.message
+        );
+      }
     } else {
       setFormErrors(errors);
     }
@@ -71,170 +92,180 @@ const SignUpForm = () => {
   return (
     <div className="max-w-lg mx-auto p-8 border border-gray-300 rounded-md">
       <h2 className="text-2xl font-bold mb-6">Register</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+      {isRegistered ? (
+        <p className="text-green-500">
+          Registration successful! You can now log in.
+        </p>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <input
+                type="text"
+                name="firstName"
+                placeholder="First Name"
+                value={formData.firstName}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+              {formErrors.firstName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.firstName}
+                </p>
+              )}
+            </div>
+            <div>
+              <input
+                type="text"
+                name="lastName"
+                placeholder="Last Name"
+                value={formData.lastName}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+              {formErrors.lastName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.lastName}
+                </p>
+              )}
+            </div>
+          </div>
+
           <div>
             <input
-              type="text"
-              name="firstName"
-              placeholder="First Name"
-              value={formData.firstName}
+              type="email"
+              name="email"
+              placeholder="Email*"
+              value={formData.email}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-md"
             />
-            {formErrors.firstName && (
+            {formErrors.email && (
+              <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password*"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+              <button
+                type="button"
+                onClick={handleTogglePassword}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              >
+                👁️
+              </button>
+              {formErrors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.password}
+                </p>
+              )}
+            </div>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                placeholder="Confirm Password*"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+              <button
+                type="button"
+                onClick={handleToggleConfirmPassword}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              >
+                👁️
+              </button>
+              {formErrors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.confirmPassword}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <input
+            type="text"
+            name="phone"
+            placeholder="Phone"
+            value={formData.phone}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md"
+          />
+          {formErrors.phone && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              name="major"
+              placeholder="Major"
+              value={formData.major}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md"
+            />
+            {formErrors.major && (
+              <p className="text-red-500 text-sm mt-1">{formErrors.major}</p>
+            )}
+            <input
+              type="text"
+              name="graduationYear"
+              placeholder="Graduation Year"
+              value={formData.graduationYear}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md"
+            />
+            {formErrors.graduationYear && (
               <p className="text-red-500 text-sm mt-1">
-                {formErrors.firstName}
+                {formErrors.graduationYear}
               </p>
             )}
           </div>
-          <div>
-            <input
-              type="text"
-              name="lastName"
-              placeholder="Last Name"
-              value={formData.lastName}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
-            />
-            {formErrors.lastName && (
-              <p className="text-red-500 text-sm mt-1">{formErrors.lastName}</p>
-            )}
-          </div>
-        </div>
 
-        <div>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email*"
-            value={formData.email}
+          <select
+            name="occupation"
+            value={formData.occupation}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-md"
-          />
-          {formErrors.email && (
-            <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+          >
+            <option value="">Occupation</option>
+            <option value="Student">Student</option>
+            <option value="Professional">Professional</option>
+            <option value="Other">Other</option>
+          </select>
+          {formErrors.occupation && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.occupation}</p>
           )}
-        </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              placeholder="Password*"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
-            />
-            <button
-              type="button"
-              onClick={handleTogglePassword}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-            >
-              👁️
-            </button>
-            {formErrors.password && (
-              <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>
-            )}
-          </div>
-          <div className="relative">
-            <input
-              type={showConfirmPassword ? "text" : "password"}
-              name="confirmPassword"
-              placeholder="Confirm Password*"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
-            />
-            <button
-              type="button"
-              onClick={handleToggleConfirmPassword}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-            >
-              👁️
-            </button>
-            {formErrors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">
-                {formErrors.confirmPassword}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <input
-          type="text"
-          name="phone"
-          placeholder="Phone"
-          value={formData.phone}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-md"
-        />
-        {formErrors.phone && (
-          <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>
-        )}
-
-        <div className="grid grid-cols-2 gap-4">
           <input
             type="text"
-            name="major"
-            placeholder="Major"
-            value={formData.major}
+            name="interests"
+            placeholder="Interests"
+            value={formData.interests}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-md"
           />
-          {formErrors.major && (
-            <p className="text-red-500 text-sm mt-1">{formErrors.major}</p>
+          {formErrors.interests && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.interests}</p>
           )}
-          <input
-            type="text"
-            name="graduationYear"
-            placeholder="Graduation Year"
-            value={formData.graduationYear}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md"
-          />
-          {formErrors.graduationYear && (
-            <p className="text-red-500 text-sm mt-1">
-              {formErrors.graduationYear}
-            </p>
-          )}
-        </div>
 
-        <select
-          name="occupation"
-          value={formData.occupation}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-md"
-        >
-          <option value="">Occupation</option>
-          <option value="Student">Student</option>
-          <option value="Professional">Professional</option>
-          <option value="Other">Other</option>
-        </select>
-        {formErrors.occupation && (
-          <p className="text-red-500 text-sm mt-1">{formErrors.occupation}</p>
-        )}
-
-        <input
-          type="text"
-          name="interests"
-          placeholder="Interests"
-          value={formData.interests}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border rounded-md"
-        />
-        {formErrors.interests && (
-          <p className="text-red-500 text-sm mt-1">{formErrors.interests}</p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full bg-black text-white px-4 py-2 rounded-md"
-        >
-          Register
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="w-full bg-black text-white px-4 py-2 rounded-md"
+          >
+            Register
+          </button>
+        </form>
+      )}
     </div>
   );
 };

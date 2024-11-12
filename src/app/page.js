@@ -2,15 +2,19 @@
 
 import LandingPage from "../components/Landing Page/LandingPage";
 import Posts from "../components/Posts/Posts";
-import Image from "next/image";
 import { useSelector } from "react-redux";
 
 export default function Home() {
-  const isLoggedIn = useSelector((state) => state.auth.isAuthenticated);
+  const { isAuthenticated, userRole, user } = useSelector(
+    (state) => state.auth
+  );
 
-  if (isLoggedIn) {
+  if (isAuthenticated) {
     return (
-      <div className="p-2 overflow-y-auto scrollbar-none h-full ">
+      <div className="p-2 overflow-y-auto scrollbar-none h-full">
+        <p className="text-lg font-semibold mb-4 text-2xl">
+          Welcome, <span className="text-black font-bold">{user.f_name}</span>!
+        </p>
         <Posts />
       </div>
     );

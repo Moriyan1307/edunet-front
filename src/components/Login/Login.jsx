@@ -1,10 +1,10 @@
-// app/login/page.js
 "use client";
 
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setSignIn } from "../../app/redux/slices/authSlice"; // Adjust the path
-import { useRouter } from "next/navigation"; // Use for navigation in Next.js app router
+import { useRouter } from "next/navigation";
+import axiosInstance from "../../utils/axiosInstance"; // Ensure axiosInstance is imported
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -15,6 +15,7 @@ export default function LoginForm() {
   const [formErrors, setFormErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isInvalid, setIsInvalid] = useState(false);
+  const [userNot, setUserNot] = useState("");
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -41,31 +42,37 @@ export default function LoginForm() {
     return errors;
   };
 
-  const handleOnSubmit = (e) => {
+  const handleOnSubmit = async (e) => {
     e.preventDefault();
     const errors = validateForm();
     if (Object.keys(errors).length === 0) {
-      // Handle predefined user credentials
-      if (
-        formData.email === "student@uta.com" &&
-        formData.password === "password"
-      ) {
+      try {
+        console.log(formData);
+        // Use axiosInstance to post credentials to the backend
+        const response = await axiosInstance.post("/login", formData);
+        const user = response.data;
+
+        console.log(response.data);
+
+        // Store user role in Redux for authentication
+        dispatch(
+          setSignIn({
+            role:
+              user.role_id === 1
+                ? "student"
+                : user.role_id === 2
+                ? "professor"
+                : "admin",
+            user, // Pass the entire user object
+          })
+        );
+
+        // Redirect to homepage or dashboard
         router.push("/");
-        dispatch(setSignIn("student"));
-      } else if (
-        formData.email === "professor@uta.com" &&
-        formData.password === "password"
-      ) {
-        router.push("/");
-        dispatch(setSignIn("professor"));
-      } else if (
-        formData.email === "admin@uta.com" &&
-        formData.password === "password"
-      ) {
-        router.push("/");
-        dispatch(setSignIn("admin"));
-      } else {
-        setIsInvalid(true);
+      } catch (error) {
+        setIsInvalid(true); // Show invalid credentials message
+        setUserNot(error.response?.data?.message || error.message);
+        console.error("Error:", error.response?.data?.message || error.message);
       }
     } else {
       setFormErrors(errors);
@@ -117,9 +124,7 @@ export default function LoginForm() {
         >
           Login
         </button>
-        {isInvalid && (
-          <p className="text-red-500 mt-2">Invalid email or password</p>
-        )}
+        {isInvalid && <p className="text-red-500 mt-2">{userNot}</p>}
       </form>
     </div>
   );
