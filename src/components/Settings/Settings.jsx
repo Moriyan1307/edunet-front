@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import axiosInstance from "../../utils/axiosInstance";
 
 // InputField Component
 const InputField = ({
@@ -43,8 +45,8 @@ const SelectField = ({ label, name, options, value, handleChange, error }) => (
       } rounded-md`}
     >
       {options.map((option) => (
-        <option key={option} value={option}>
-          {option}
+        <option key={option.value} value={option.value}>
+          {option.label}
         </option>
       ))}
     </select>
@@ -52,38 +54,67 @@ const SelectField = ({ label, name, options, value, handleChange, error }) => (
   </div>
 );
 
-// Main SettingsForm Component
 const SettingsForm = () => {
+  const user = useSelector((state) => state.auth.user);
   const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@email.com",
-    phoneNumber: "123 456 7890",
-    role: "Student",
-    interests: "Front - end Dev",
-    major: "Computer Science",
-    graduationYear: "2025",
+    f_name: "",
+    l_name: "",
+    email: "",
+    phone_number: "",
+    role_id: "",
+    interests: "",
+    major: "",
+    graduation_year: "",
+    user_id: user.user_id,
   });
-
+  const [initialData, setInitialData] = useState(null); // To hold fetched initial data for comparison
   const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axiosInstance.get(`/users/${user.user_id}`);
+        const fetchedUser = response.data;
+
+        const mappedData = {
+          f_name: fetchedUser.f_name,
+          l_name: fetchedUser.l_name,
+          email: fetchedUser.email,
+          phone_number: fetchedUser.phone_number,
+          role_id: fetchedUser.role_id,
+          interests: fetchedUser.interests,
+          major: fetchedUser.major,
+          graduation_year: fetchedUser.graduation_year
+            ? fetchedUser.graduation_year.toString()
+            : "",
+        };
+
+        setFormData(mappedData);
+        setInitialData(mappedData);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [user.user_id]);
 
   const validateField = (name, value) => {
     switch (name) {
-      case "firstName":
-      case "lastName":
+      case "f_name":
+      case "l_name":
         return value.trim() ? "" : "This field is required";
       case "email":
         return /^\S+@\S+\.\S+$/.test(value) ? "" : "Invalid email format";
-      case "phoneNumber":
-        return /^\d{3} \d{3} \d{4}$/.test(value)
-          ? ""
-          : "Invalid phone number format (e.g., 123 456 7890)";
-      case "graduationYear":
+      case "phone_number":
+        return /^\d{10}$/.test(value) ? "" : "Invalid phone number";
+      case "graduation_year":
         return /^\d{4}$/.test(value) &&
           parseInt(value) > 2000 &&
           parseInt(value) < 2100
           ? ""
-          : "Invalid year (should be between 2001 and 2099)";
+          : "Invalid year";
       default:
         return "";
     }
@@ -91,19 +122,14 @@ const SettingsForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: validateField(name, value),
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
     Object.keys(formData).forEach((key) => {
@@ -113,30 +139,46 @@ const SettingsForm = () => {
       }
     });
     setErrors(newErrors);
-    if (Object.keys(newErrors).length === 0) {
-      console.log("Form submitted:", formData);
-      // Here you would typically send the data to an API
+
+    const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialData);
+
+    if (Object.keys(newErrors).length === 0 && hasChanges) {
+      try {
+        console.log(formData);
+        const response = await axiosInstance.put("/users/api/settings", {
+          user_id: user.user_id,
+          ...formData,
+        });
+        setMessage(response.data.message || "Settings updated successfully");
+        setInitialData(formData); // Update initialData to current formData after successful update
+      } catch (error) {
+        console.error("Error updating settings:", error);
+        setMessage("Failed to update settings. Please try again.");
+      }
+    } else if (!hasChanges) {
+      setMessage("No changes made to update.");
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-4xl font-normal mb-6">Settings</h1>
+      {message && <p className="text-green-500 mb-4">{message}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <InputField
             label="First Name"
-            name="firstName"
-            value={formData.firstName}
+            name="f_name"
+            value={formData.f_name}
             handleChange={handleChange}
-            error={errors.firstName}
+            error={errors.f_name}
           />
           <InputField
             label="Last Name"
-            name="lastName"
-            value={formData.lastName}
+            name="l_name"
+            value={formData.l_name}
             handleChange={handleChange}
-            error={errors.lastName}
+            error={errors.l_name}
           />
         </div>
         <InputField
@@ -150,19 +192,23 @@ const SettingsForm = () => {
         <div className="grid grid-cols-2 gap-4">
           <InputField
             label="Phone Number"
-            name="phoneNumber"
+            name="phone_number"
             type="tel"
-            value={formData.phoneNumber}
+            value={formData.phone_number}
             handleChange={handleChange}
-            error={errors.phoneNumber}
+            error={errors.phone_number}
           />
           <SelectField
             label="Role"
-            name="role"
-            value={formData.role}
-            options={["Student", "Teacher", "Administrator"]}
+            name="role_id"
+            value={formData.role_id}
+            options={[
+              { label: "Student", value: 1 },
+              { label: "Mentor", value: 2 },
+              { label: "Alumni", value: 3 },
+            ]}
             handleChange={handleChange}
-            error={errors.role}
+            error={errors.role_id}
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -170,7 +216,11 @@ const SettingsForm = () => {
             label="Interests"
             name="interests"
             value={formData.interests}
-            options={["Front - end Dev", "Back - end Dev", "Full - stack Dev"]}
+            options={[
+              { label: "Front-end Dev", value: "Front-end Dev" },
+              { label: "Back-end Dev", value: "Back-end Dev" },
+              { label: "Full-stack Dev", value: "Full-stack Dev" },
+            ]}
             handleChange={handleChange}
             error={errors.interests}
           />
@@ -184,10 +234,10 @@ const SettingsForm = () => {
         </div>
         <InputField
           label="Graduation Year"
-          name="graduationYear"
-          value={formData.graduationYear}
+          name="graduation_year"
+          value={formData.graduation_year}
           handleChange={handleChange}
-          error={errors.graduationYear}
+          error={errors.graduation_year}
         />
         <div className="flex justify-end mt-6">
           <button

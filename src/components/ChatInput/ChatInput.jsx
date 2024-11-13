@@ -46,16 +46,20 @@ const MessageInput = ({ conversationId, onMessageSent }) => {
         onChange={(e) => setMessage(e.target.value)}
         onKeyPress={handleKeyPress}
       />
-      <button className="ml-2" onClick={sendMessage}>
+      <button
+        className="ml-2 p-2 rounded-full bg-black text-white hover:bg-gray-600 focus:outline-none"
+        onClick={sendMessage}
+      >
         <svg
-          className="w-6 h-6 text-gray-500"
+          className="w-5 h-5"
           fill="currentColor"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
         >
           <path
             fillRule="evenodd"
-            d="M2.293 6.293a1 1 0 011.414 0l9 9a1 1 0 001.414 0l9-9a1 1 0 10-1.414-1.414L12 13.586 3.707 5.293a1 1 0 00-1.414 0z"
+            d="M22 12L3 5v4l9 3-9 3v4l19-7z"
+            clipRule="evenodd"
           />
         </svg>
       </button>

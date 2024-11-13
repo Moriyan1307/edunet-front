@@ -1,5 +1,6 @@
 import Link from "next/link";
 import React from "react";
+import { useSelector } from "react-redux";
 
 const ProfileField = ({ label, value }) => (
   <div className="mb-6">
@@ -9,30 +10,41 @@ const ProfileField = ({ label, value }) => (
 );
 
 const Profile = () => {
-  const userInfo = {
-    firstName: "Usha",
-    lastName: "Sai",
-    email: "usha.sai@email.com",
-    role: "Student",
-    phoneNumber: "123 456 7890",
-    major: "Computer Science",
-    interests: "Front- end Dev",
-    graduationYear: "2025",
-  };
+  // Retrieve the logged-in user data from Redux
+  const userInfo = useSelector((state) => state.auth.user);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
       <h1 className="text-3xl font-bold mb-8">Profile</h1>
 
       <div className="grid md:grid-cols-2 gap-x-8 gap-y-4">
-        <ProfileField label="First Name" value={userInfo.firstName} />
-        <ProfileField label="Last Name" value={userInfo.lastName} />
-        <ProfileField label="Email" value={userInfo.email} />
-        <ProfileField label="Role" value={userInfo.role} />
-        <ProfileField label="Phone Number" value={userInfo.phoneNumber} />
-        <ProfileField label="Major" value={userInfo.major} />
-        <ProfileField label="Interests" value={userInfo.interests} />
-        <ProfileField label="Graduation Year" value={userInfo.graduationYear} />
+        <ProfileField label="First Name" value={userInfo?.f_name || "N/A"} />
+        <ProfileField label="Last Name" value={userInfo?.l_name || "N/A"} />
+        <ProfileField label="Email" value={userInfo?.email || "N/A"} />
+        <ProfileField
+          label="Role"
+          value={
+            userInfo?.role_id === 1
+              ? "student"
+              : userInfo?.role_id === 2
+              ? "mentor"
+              : "alumni"
+          }
+        />
+        <ProfileField
+          label="Phone Number"
+          value={userInfo?.phone_number || "N/A"}
+        />
+        <ProfileField label="Major" value={userInfo?.major || "N/A"} />
+        <ProfileField label="Interests" value={userInfo?.interests || "N/A"} />
+        <ProfileField
+          label="Graduation Year"
+          value={userInfo?.graduation_year || "N/A"}
+        />
+        <ProfileField
+          label="University"
+          value={userInfo?.university || "N/A"}
+        />
       </div>
 
       <div className="mt-8">

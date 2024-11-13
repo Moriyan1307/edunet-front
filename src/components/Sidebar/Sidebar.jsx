@@ -53,11 +53,6 @@ const paths = [
     path: "/contact",
     icon: PhoneIcon,
   },
-  {
-    title: "Search",
-    path: "/search",
-    icon: PhoneIcon,
-  },
 ];
 
 export default function Sidebar() {

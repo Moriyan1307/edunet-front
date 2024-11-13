@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import axiosInstance from "../../utils/axiosInstance";
 
-const ChatWindow = ({ conversationId, messages }) => {
+const ChatWindow = ({ conversationId, messages, user }) => {
   const [fetchedMessages, setFetchedMessages] = useState([]);
   const currentUserId = useSelector((state) => state.auth.user.user_id);
 
@@ -24,27 +24,39 @@ const ChatWindow = ({ conversationId, messages }) => {
   }, [conversationId]);
 
   return (
-    <div className="h-2/5 flex flex-col flex-grow p-4 bg-white">
-      {[...fetchedMessages, ...messages].map((message, index) => (
-        <div
-          key={index}
-          className={`flex ${
-            message.sender_id === currentUserId
-              ? "justify-end"
-              : "justify-start"
-          } mb-2`}
-        >
-          <div
-            className={`p-3 rounded-lg max-w-xs ${
-              message.sender_id === currentUserId
-                ? "bg-black text-white"
-                : "bg-gray-200 text-gray-900"
-            }`}
-          >
-            {message.content}
-          </div>
+    <div className="flex flex-col flex-grow bg-white">
+      {/* Display the user's name at the top */}
+      {user && (
+        <div className="px-4 py-2 border-b bg-gray-100">
+          <h3 className="text-lg font-semibold">
+            {user.f_name} {user.l_name}
+          </h3>
         </div>
-      ))}
+      )}
+
+      {/* Display the messages */}
+      <div className="flex flex-col flex-grow p-4">
+        {[...fetchedMessages, ...messages].map((message, index) => (
+          <div
+            key={index}
+            className={`flex ${
+              message.sender_id === currentUserId
+                ? "justify-end"
+                : "justify-start"
+            } mb-2`}
+          >
+            <div
+              className={`p-3 rounded-lg max-w-xs ${
+                message.sender_id === currentUserId
+                  ? "bg-black text-white"
+                  : "bg-gray-200 text-gray-900"
+              }`}
+            >
+              {message.content}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

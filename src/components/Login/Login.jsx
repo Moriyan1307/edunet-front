@@ -57,12 +57,7 @@ export default function LoginForm() {
         // Store user role in Redux for authentication
         dispatch(
           setSignIn({
-            role:
-              user.role_id === 1
-                ? "student"
-                : user.role_id === 2
-                ? "professor"
-                : "admin",
+            role: user.role_id,
             user, // Pass the entire user object
           })
         );
