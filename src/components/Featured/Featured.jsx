@@ -1,30 +1,6 @@
-// app/components/FeaturedProfile.js
-// import { events, profiles } from "./data";
-
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-
-const profiles = [
-  {
-    name: "Florencio Dorrance",
-    title: "Project Manager",
-    image: "/profile1.jpg",
-  },
-  {
-    name: "Benny Spanbauer",
-    title: " Sales Manager",
-    image: "/profile2.jpg",
-  },
-  {
-    name: "Jamel Eusebio",
-    title: "React Dev",
-    image: "/profile3.jpg",
-  },
-  {
-    name: "Lavern Laboy",
-    title: "Backend Dev",
-    image: "/profile4.jpg",
-  },
-];
+import axiosInstance from "../../utils/axiosInstance"; // Adjust the path as needed
 
 const events = [
   {
@@ -34,76 +10,106 @@ const events = [
   },
   {
     id: 2,
-    name: "Create An LMS Website With EduNet",
-    date: "Sept 25, 2024",
+    name: "JavaScript Frameworks Webinar",
+    date: "Oct 10, 2024",
   },
   {
     id: 3,
-    name: "Create An LMS Website With EduNet",
-    date: "Sept 25, 2024",
+    name: "React Native Conference",
+    date: "Nov 15, 2024",
   },
 ];
 
 export default function FeaturedProfile() {
+  const [featuredProfiles, setFeaturedProfiles] = useState([]);
   const isLoggedIn = useSelector((state) => state.auth.isAuthenticated);
+  const user = useSelector((state) => state.auth.user);
 
-  if (isLoggedIn) {
-    return (
-      <div className="w-3/12 bg-white p-5 shadow-md h-full">
-        <div className="p-2">
-          <h2 className="text-xl font-semibold border-b pb-2 text-center">
-            Featured Profile
-          </h2>
-          <div className="mt-4">
-            {profiles.map((profile) => (
-              <div key={profile.name} className="flex items-center py-3">
+  useEffect(() => {
+    const fetchFeaturedProfiles = async () => {
+      if (user?.interests) {
+        try {
+          const response = await axiosInstance.get("/users/api/featured", {
+            params: { interests: user.interests },
+          });
+          console.log(response.data);
+          const profiles = response.data.filter(
+            (profile) => profile.user_id !== user.user_id
+          );
+          setFeaturedProfiles(profiles);
+        } catch (error) {
+          console.error("Error fetching featured profiles:", error);
+        }
+      }
+    };
+
+    if (isLoggedIn) {
+      fetchFeaturedProfiles();
+    }
+  }, [isLoggedIn, user?.interests, user?.user_id]);
+
+  if (!isLoggedIn) return null;
+
+  return (
+    <div className="w-3/12 bg-white p-5 shadow-md h-full">
+      <div className="p-2">
+        <h2 className="text-xl font-semibold border-b pb-2 text-center">
+          Featured Profiles
+        </h2>
+        <div className="mt-4">
+          {featuredProfiles.length > 0 ? (
+            featuredProfiles.map((profile) => (
+              <div key={profile.user_id} className="flex items-center py-3">
                 <img
-                  src={profile.image}
-                  alt={profile.name}
+                  src={profile.image_url || "/default_avatar.jpg"}
+                  alt={profile.f_name}
                   className="w-10 h-10 rounded-full object-cover mr-3 border-2"
                 />
                 <div>
-                  <p className="text-sm">{profile.name}</p>
-                  <p className="text-xs text-gray-500">{profile.title}</p>
+                  <p className="text-sm">
+                    {profile.f_name} {profile.l_name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {profile.major || profile.title}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="p-2">
-          <h2 className="text-xl font-semibold border-b pb-2 text-center">
-            Events
-          </h2>
-          <div className="mt-4">
-            {events.map((event) => (
-              <div
-                key={event.id}
-                className="flex items-center justify-between py-3"
-              >
-                <div className="flex items-center">
-                  <div className="w-10 h-10 bg-gray-100 flex items-center justify-center rounded-full mr-3">
-                    <img
-                      src="/calendar-icon.svg"
-                      alt="Event Icon"
-                      className="w-6 h-6"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm">{event.name}</p>
-                    <p className="text-xs text-gray-500">{event.date}</p>
-                  </div>
-                </div>
-                {/* <button className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center">
-                <span className="text-xl">+</span>
-              </button> */}
-              </div>
-            ))}
-          </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-center">
+              No featured profiles available
+            </p>
+          )}
         </div>
       </div>
-    );
-  } else {
-    return null;
-  }
+
+      <div className="p-2">
+        <h2 className="text-xl font-semibold border-b pb-2 text-center">
+          Events
+        </h2>
+        <div className="mt-4">
+          {events.map((event) => (
+            <div
+              key={event.id}
+              className="flex items-center justify-between py-3"
+            >
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-gray-100 flex items-center justify-center rounded-full mr-3">
+                  <img
+                    src="/calendar-icon.svg"
+                    alt="Event Icon"
+                    className="w-6 h-6"
+                  />
+                </div>
+                <div>
+                  <p className="text-sm">{event.name}</p>
+                  <p className="text-xs text-gray-500">{event.date}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 }

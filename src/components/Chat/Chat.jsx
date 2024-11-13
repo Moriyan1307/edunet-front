@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import axiosInstance from "../../utils/axiosInstance";
@@ -25,17 +23,19 @@ const ChatWindow = ({ conversationId, messages, user }) => {
 
   return (
     <div className="flex flex-col flex-grow bg-white">
-      {/* Display the user's name at the top */}
+      {/* Display conversation name or user's name */}
       {user && (
         <div className="px-4 py-2 border-b bg-gray-100">
           <h3 className="text-lg font-semibold">
-            {user.f_name} {user.l_name}
+            {user.isGroupChat
+              ? user.conversation_name
+              : `${user.f_name} ${user.l_name}`}
           </h3>
         </div>
       )}
 
       {/* Display the messages */}
-      <div className="flex flex-col flex-grow p-4">
+      <div className="flex flex-col flex-grow p-4 overflow-y-auto">
         {[...fetchedMessages, ...messages].map((message, index) => (
           <div
             key={index}
