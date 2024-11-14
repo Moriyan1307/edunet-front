@@ -22,14 +22,12 @@ const ChatWindow = ({ conversationId, messages, user }) => {
   }, [conversationId]);
 
   return (
-    <div className="flex flex-col flex-grow bg-white">
+    <div className="flex flex-col overflow-y-auto  flex-grow bg-white">
       {/* Display conversation name or user's name */}
       {user && (
         <div className="px-4 py-2 border-b bg-gray-100">
           <h3 className="text-lg font-semibold">
-            {user.isGroupChat
-              ? user.conversation_name
-              : `${user.f_name} ${user.l_name}`}
+            {user.isGroupChat ? user.conversation_name : `${user.display_name}`}
           </h3>
         </div>
       )}
@@ -37,22 +35,33 @@ const ChatWindow = ({ conversationId, messages, user }) => {
       {/* Display the messages */}
       <div className="flex flex-col flex-grow p-4 overflow-y-auto">
         {[...fetchedMessages, ...messages].map((message, index) => (
-          <div
-            key={index}
-            className={`flex ${
-              message.sender_id === currentUserId
-                ? "justify-end"
-                : "justify-start"
-            } mb-2`}
-          >
+          <div key={index} className="mb-4">
+            {/* Display sender name above message */}
             <div
-              className={`p-3 rounded-lg max-w-xs ${
-                message.sender_id === currentUserId
-                  ? "bg-black text-white"
-                  : "bg-gray-200 text-gray-900"
+              className={`text-sm mb-1 ${
+                message.sender_id === currentUserId ? "text-right" : "text-left"
               }`}
             >
-              {message.content}
+              {message.sender_id === currentUserId
+                ? "You"
+                : message.sender_name}
+            </div>
+            <div
+              className={`flex ${
+                message.sender_id === currentUserId
+                  ? "justify-end"
+                  : "justify-start"
+              }`}
+            >
+              <div
+                className={`p-3 rounded-lg max-w-xs ${
+                  message.sender_id === currentUserId
+                    ? "bg-black text-white"
+                    : "bg-gray-200 text-gray-900"
+                }`}
+              >
+                {message.content}
+              </div>
             </div>
           </div>
         ))}

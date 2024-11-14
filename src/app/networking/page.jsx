@@ -25,6 +25,8 @@ const Networking = () => {
     setMessages([]); // Clear messages when switching conversations
   };
 
+  console.log(conversationUser);
+
   return (
     <div className="h-full flex flex-col ">
       <TopNav activeTab={activeTab} onTabChange={(tab) => setActiveTab(tab)} />

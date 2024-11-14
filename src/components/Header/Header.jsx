@@ -12,11 +12,12 @@ export default function Header() {
   const router = useRouter();
   const state = useSelector((state) => state.auth);
   const isLoggedIn = state.isAuthenticated;
+  console.log(state);
 
   // Set user name based on userRole when the component renders
   useEffect(() => {
     if (state.userRole) {
-      setUser(state.userRole); // Assuming 'userRole' is the name of the user or user-related info
+      setUser(state.user); // Assuming 'userRole' is the name of the user or user-related info
     }
   }, [state.userRole]);
 
@@ -39,7 +40,11 @@ export default function Header() {
           <div className="flex items-center space-x-4">
             <NotificationsIcon sx={{ fontSize: 28 }} />
             <PersonIcon sx={{ fontSize: 28 }} />
-            <span>{user}</span> {/* Display the user info */}
+            <span>
+              {user.f_name}
+              <span></span> {user.l_name}
+            </span>{" "}
+            {/* Display the user info */}
             <button
               className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900"
               onClick={handleLogout}

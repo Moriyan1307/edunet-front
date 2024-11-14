@@ -32,7 +32,7 @@ export default function FeaturedProfile() {
           const response = await axiosInstance.get("/users/api/featured", {
             params: { interests: user.interests },
           });
-          console.log(response.data);
+
           const profiles = response.data.filter(
             (profile) => profile.user_id !== user.user_id
           );
