@@ -20,7 +20,7 @@ export default function RootLayout({ children }) {
               <Header />
 
               <div className="flex flex-grow">
-                <div className="flex-1 p-4">{children}</div>
+                <div className="flex-1 overflow-hidden p-4">{children}</div>
                 <FeaturedProfile />
               </div>
             </div>

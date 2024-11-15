@@ -15,6 +15,7 @@ const CareerDevelopment = () => {
       try {
         const response = await axiosInstance.get("/articles");
         setArticles(response.data);
+        console.log(articles);
       } catch (error) {
         console.error("Error fetching articles:", error);
       }
@@ -32,7 +33,7 @@ const CareerDevelopment = () => {
   };
 
   return (
-    <div className="h-full w-full p-6 bg-white">
+    <div className="h-full w-full overflow-auto p-6 bg-white">
       <h1 className="text-2xl font-bold mb-6">Career Development</h1>
       <div className="flex flex-col space-y-4">
         {articles.map((article) => (

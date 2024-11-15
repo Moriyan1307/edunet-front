@@ -1,35 +1,47 @@
 "use client";
 
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import CareerDevelopment from "../../components/CareerDevelopment/CareerDevelopment";
 import MentorshipProgram from "../../components/MentorshipProgram/MentorshipProgram";
-import MentorshipForm from "../../components/MentorshipApplicationForm/MentorshipApplicationForm"; // Assuming you have a separate component for the form
+import MentorshipForm from "../../components/MentorshipApplicationForm/MentorshipApplicationForm";
+import EnrolledStudents from "../../components/EnrolledStudents/EnrolledStudents";
 import ResourcesTopNavigation from "../../components/ResourcesNavigation/ResourcesNavigation";
 
-
 const Resources = () => {
-  const [activeTab, setActiveTab] = useState("career"); // 'career' or 'mentorship'
+  const [activeTab, setActiveTab] = useState("career");
   const [showMentorshipForm, setShowMentorshipForm] = useState(false);
+  const [selectedMentorId, setSelectedMentorId] = useState(null);
 
-   const handleEnrollClick = () => {
-     setShowMentorshipForm(true);
-   };
+  const currentUser = useSelector((state) => state.auth.user); // Adjust based on your state structure
 
-   const handleBackToMentorshipProgram = () => {
-     setShowMentorshipForm(false);
-   };
+  const handleEnrollClick = (mentorId) => {
+    setSelectedMentorId(mentorId);
+    setShowMentorshipForm(true);
+  };
+
+  const handleBackToMentorshipProgram = () => {
+    setShowMentorshipForm(false);
+    setSelectedMentorId(null);
+  };
 
   return (
     <div className="h-full flex flex-col">
-      {/* Top Navigation */}
-      <ResourcesTopNavigation activeTab={activeTab} onTabChange={(tab) => setActiveTab(tab)} />
+      <ResourcesTopNavigation
+        activeTab={activeTab}
+        onTabChange={(tab) => setActiveTab(tab)}
+      />
 
-      {/* Content Area */}
       <div className="flex flex-grow mt-4">
         {activeTab === "career" ? (
           <CareerDevelopment />
+        ) : currentUser.role_id === 2 ? (
+          <EnrolledStudents mentorId={currentUser.user_id} />
         ) : showMentorshipForm ? (
-          <MentorshipForm onBack={handleBackToMentorshipProgram} />
+          <MentorshipForm
+            onBack={handleBackToMentorshipProgram}
+            mentorId={selectedMentorId}
+          />
         ) : (
           <MentorshipProgram onEnroll={handleEnrollClick} />
         )}

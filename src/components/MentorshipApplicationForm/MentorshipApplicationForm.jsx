@@ -1,6 +1,6 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 
-// InputField Component
 const InputField = ({
   label,
   name,
@@ -29,7 +29,9 @@ const InputField = ({
   </div>
 );
 
-const MentorshipForm = ({ onBack }) => {
+const MentorshipForm = ({ onBack, mentorId }) => {
+  console.log(mentorId);
+  const currentUserId = useSelector((state) => state.auth.user.user_id); // Get student_id from Redux
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -78,7 +80,7 @@ const MentorshipForm = ({ onBack }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
     Object.keys(formData).forEach((key) => {
@@ -88,26 +90,49 @@ const MentorshipForm = ({ onBack }) => {
       }
     });
     setErrors(newErrors);
+
     if (Object.keys(newErrors).length === 0) {
-      console.log("Form submitted:", formData);
-      // Reset form data
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        course: "",
-        major: "",
-        graduationYear: "",
-      });
-      // Trigger the onBack function
-      onBack();
+      try {
+        const response = await fetch(
+          "http://localhost:8000/api/mentorship/enroll",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              mentor_id: mentorId, // Include mentor_id
+              student_id: currentUserId, // Include student_id
+              ...formData,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          alert("Successfully enrolled in mentorship program");
+          console.log("Successfully enrolled in mentorship program");
+          setFormData({
+            firstName: "",
+            lastName: "",
+            email: "",
+            phone: "",
+            course: "",
+            major: "",
+            graduationYear: "",
+          });
+          onBack();
+        } else {
+          console.error("Failed to enroll in mentorship program");
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+      }
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-4xl font-normal mb-6">Mentorship Program Application</h1>
+      <h1 className="text-4xl font-normal mb-6">
+        Mentorship Program Application
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Name Section */}
         <div>
