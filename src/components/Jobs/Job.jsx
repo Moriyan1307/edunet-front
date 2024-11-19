@@ -1,48 +1,52 @@
-import React, { useState } from "react";
+// Jobs component
+import React, { useState, useEffect } from "react";
+import axiosInstance from "../../utils/axiosInstance";
 import JobCard from "./JobCard";
 import Navigation from "./JobsNavigation";
 import AddJobForm from "./AddJobForm";
+import { useSelector } from "react-redux";
 
 const Jobs = () => {
   const [activeTab, setActiveTab] = useState("fullTime");
+  const [jobListings, setJobListings] = useState([]);
+  const [isAddingJob, setIsAddingJob] = useState(false);
+  const user = useSelector((state) => state.auth.user);
+  const userId = user.user_id;
 
-  const [jobListings, setJobListings] = useState([
-    {
-      company: "Google Inc.",
-      title: "Fresher UI/UX Designer (3 Year Exp )",
-      location: "Dallas, Texas",
-      type: "Full Time",
-      salary: "$120,000 - $125,000",
-    },
-    {
-      company: "Facebook Inc.",
-      title: "Fresher UI/UX Designer (3 Year Exp )",
-      location: "Dallas, Texas",
-      type: "Full Time",
-      salary: "$120,000 - $125,000",
-    },
-    {
-      company: "LinkedIn Inc.",
-      title: "Fresher UI/UX Designer (3 Year Exp )",
-      location: "Dallas, Texas",
-      type: "Full Time",
-      salary: "$120,000 - $125,000",
-    },
-  ]);
+  useEffect(() => {
+    // Fetch job listings based on the active tab
+    const fetchJobs = async () => {
+      try {
+        const response = await axiosInstance.get("/opportunities"); // Adjust endpoint as needed
+        let filteredJobs = [];
 
-  const [isFormVisible, setIsFormVisible] = useState(false);
+        if (activeTab === "fullTime") {
+          filteredJobs = response.data.filter((job) => job.is_internship === 0);
+        } else if (activeTab === "internships") {
+          filteredJobs = response.data.filter((job) => job.is_internship === 1);
+        }
 
-  const handleAddJob = () => {
-    setIsFormVisible(true);
-  };
+        setJobListings(filteredJobs);
+      } catch (error) {
+        console.error("Error fetching job listings:", error);
+      }
+    };
 
-  const handleCancelForm = () => {
-    setIsFormVisible(false);
-  };
+    fetchJobs();
+  }, [activeTab,jobListings]); // Re-run when activeTab changes
 
-  const handleRegisterJob = (newJob) => {
-    setJobListings((prevJobs) => [...prevJobs, newJob]);
-    setIsFormVisible(false);
+  const handleAddJob = async (newJob) => {
+    try {
+      const jobWithUserId = {
+        ...newJob,
+        posted_by: userId, // Add user ID to the job data
+      };
+      await axiosInstance.post("/opportunities/post-job", jobWithUserId);
+      setIsAddingJob(false);
+      setActiveTab("fullTime"); // Refresh job listings after adding a job
+    } catch (error) {
+      console.error("Error posting job:", error);
+    }
   };
 
   return (
@@ -50,24 +54,31 @@ const Jobs = () => {
       <div className="flex justify-between items-center mb-6">
         <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
         <button
-          className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md"
-          onClick={handleAddJob}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md"
+          onClick={() => setIsAddingJob(true)}
         >
           Add Job
         </button>
       </div>
 
-      {/* Show form if Add Job button is clicked */}
-      {isFormVisible ? (
+      {isAddingJob ? (
         <AddJobForm
-          onRegisterJob={handleRegisterJob}
-          onCancel={handleCancelForm}
+          onRegisterJob={handleAddJob}
+          onCancel={() => setIsAddingJob(false)}
         />
       ) : (
-        /* Job Listings */
         <div className="space-y-4 mt-8">
-          {jobListings.map((job, index) => (
-            <JobCard key={index} {...job} />
+          {jobListings.map((job) => (
+            <JobCard
+              key={job.job_id}
+              company={job.company_name}
+              title={job.title}
+              location={job.job_location}
+              type={job.job_type}
+              salary={job.salary_range}
+              description={job.description}
+              url={job.url}
+            />
           ))}
         </div>
       )}

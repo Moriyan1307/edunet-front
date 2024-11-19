@@ -54,6 +54,35 @@ const SelectField = ({ label, name, options, value, handleChange, error }) => (
   </div>
 );
 
+// NotificationPreference Component
+const NotificationPreference = ({ enabled, onToggle }) => (
+  <div className="mt-4 p-4 border border-gray-300 rounded-md">
+    <div className="flex items-center justify-between">
+      <label htmlFor="notification_toggle" className="text-base font-normal">
+        Notification Preference
+      </label>
+      <button
+        id="notification_toggle"
+        onClick={onToggle}
+        className={`w-14 h-8 rounded-full ${
+          enabled ? "bg-green-500" : "bg-gray-400"
+        } flex items-center transition duration-300 focus:outline-none`}
+      >
+        <span
+          className={`h-6 w-6 bg-white rounded-full shadow-md transform transition duration-300 ${
+            enabled ? "translate-x-6" : "translate-x-1"
+          }`}
+        />
+      </button>
+    </div>
+    <p className="text-sm text-gray-500 mt-2">
+      {enabled
+        ? "Notifications enabled. You will receive updates and alerts via email."
+        : "Notifications disabled. You will not receive email updates."}
+    </p>
+  </div>
+);
+
 const SettingsForm = () => {
   const user = useSelector((state) => state.auth.user);
   const [formData, setFormData] = useState({
@@ -66,6 +95,7 @@ const SettingsForm = () => {
     major: "",
     graduation_year: "",
     user_id: user.user_id,
+    notifications_enabled: false, // Added notification preference field
   });
   const [initialData, setInitialData] = useState(null); // To hold fetched initial data for comparison
   const [errors, setErrors] = useState({});
@@ -88,6 +118,7 @@ const SettingsForm = () => {
           graduation_year: fetchedUser.graduation_year
             ? fetchedUser.graduation_year.toString()
             : "",
+          notifications_enabled: fetchedUser.notifications_enabled,
         };
 
         setFormData(mappedData);
@@ -126,6 +157,13 @@ const SettingsForm = () => {
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: validateField(name, value),
+    }));
+  };
+
+  const handleNotificationToggle = () => {
+    setFormData((prevData) => ({
+      ...prevData,
+      notifications_enabled: !prevData.notifications_enabled,
     }));
   };
 
@@ -238,6 +276,10 @@ const SettingsForm = () => {
           value={formData.graduation_year}
           handleChange={handleChange}
           error={errors.graduation_year}
+        />
+        <NotificationPreference
+          enabled={formData.notifications_enabled}
+          onToggle={handleNotificationToggle}
         />
         <div className="flex justify-end mt-6">
           <button
