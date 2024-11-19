@@ -1,55 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, Typography } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import PersonIcon from "@mui/icons-material/Person";
-
-// Sample events data
-const events = [
-  {
-    id: 1,
-    title: "React Workshop",
-    type: "workshop",
-    date: new Date(2024, 9, 5),
-    time: "10:00 AM - 2:00 PM",
-    description: "Learn the basics of React",
-    speaker: "John Doe",
-    additionalInfo: "Bring your laptop and install Node.js beforehand.",
-    image: "/react_workshop.svg", // Image for React Workshop
-  },
-  {
-    id: 2,
-    title: "AI Seminar",
-    type: "seminar",
-    date: new Date(2024, 9, 12),
-    time: "3:00 PM - 5:00 PM",
-    description: "Exploring the future of AI",
-    speaker: "Jane Smith",
-    additionalInfo: "Discuss how AI will shape the next decade.",
-    image: "/ai_seminar.svg", // Image for AI Seminar
-  },
-  {
-    id: 3,
-    title: "UX Design Workshop",
-    type: "workshop",
-    date: new Date(2024, 9, 18),
-    time: "9:00 AM - 12:00 PM",
-    description: "Hands-on UX design techniques",
-    speaker: "Emily Johnson",
-    additionalInfo: "Workshop focuses on user-centered design practices.",
-    image: "/ux_workshop.svg", // Image for UX Design Workshop
-  },
-  {
-    id: 4,
-    title: "Cybersecurity Seminar",
-    type: "seminar",
-    date: new Date(2024, 9, 25),
-    time: "2:00 PM - 4:00 PM",
-    description: "Latest trends in cybersecurity",
-    speaker: "Michael Lee",
-    additionalInfo: "Learn about emerging cybersecurity threats and defenses.",
-    image: "/cybersecurity_seminar.svg", // Image for Cybersecurity Seminar
-  },
-];
+import axiosInstance from "../../utils/axiosInstance";
+import ContactForm from '../EventContact/EventContact';
 
 // Helper function to generate dates for the calendar
 const generateDates = (year, month) => {
@@ -70,6 +24,8 @@ const generateDates = (year, month) => {
   return dates;
 };
 
+
+
 const EventDetails = ({ event }) => {
   if (!event) return null;
 
@@ -85,7 +41,7 @@ const EventDetails = ({ event }) => {
     >
       {/* Image Section */}
       <img
-        src={event.image} // Dynamically set image based on event type
+        src={event.image_url} // Dynamically set image based on event type
         alt={event.title}
         style={{
           width: "100%",
@@ -116,7 +72,7 @@ const EventDetails = ({ event }) => {
           </Typography>
           <CalendarTodayIcon style={{ margin: "0 5px" }} />
           <Typography variant="body2" component="p">
-            {event.date.toLocaleDateString()}
+            {new Date(event.start_time).toLocaleDateString()}
           </Typography>
         </div>
 
@@ -129,29 +85,46 @@ const EventDetails = ({ event }) => {
         >
           {event.description}
         </Typography>
-        <Typography
-          variant="body1"
-          color="textSecondary"
-          component="p"
-          style={{ marginTop: "10px" }}
-        >
-          {event.additionalInfo ||
-            "No additional information available for this event."}
-        </Typography>
       </CardContent>
     </Card>
   );
 };
 
-// CalendarComponent
 export default function CalendarComponent() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [events, setEvents] = useState([]);
 
-  const dates = generateDates(
-    currentDate.getFullYear(),
-    currentDate.getMonth()
-  );
+   const [showContactForm, setShowContactForm] = useState(false);
+
+ const handleCloseDetails = () => {
+     setSelectedEvent(null);
+     setShowContactForm(false); // Ensure the contact form is closed
+   };
+
+
+
+  useEffect(() => {
+    // Fetch events from the backend when the component mounts
+    const fetchEvents = async () => {
+      try {
+        const response = await axiosInstance.get("/events"); // Replace with the actual endpoint for events
+        // Map the backend events to include Date objects
+        const mappedEvents = response.data.map((event) => ({
+          ...event,
+          start_time: new Date(event.start_time),
+          end_time: new Date(event.end_time),
+        }));
+        setEvents(mappedEvents); // Store mapped events with Date objects
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+
+    fetchEvents();
+  }, []); // Empty dependency array means this will run only once when the component mounts
+
+  const dates = generateDates(currentDate.getFullYear(), currentDate.getMonth());
 
   const navigateMonth = (direction) => {
     setCurrentDate(
@@ -160,11 +133,14 @@ export default function CalendarComponent() {
   };
 
   const getEventsForDate = (date) => {
+    // Ensure that date is valid and check if it has a valid value
+    if (!date || !(date instanceof Date)) return [];
+
     return events.filter(
       (event) =>
-        event.date.getDate() === date.getDate() &&
-        event.date.getMonth() === date.getMonth() &&
-        event.date.getFullYear() === date.getFullYear()
+        event.start_time.getDate() === date.getDate() &&
+        event.start_time.getMonth() === date.getMonth() &&
+        event.start_time.getFullYear() === date.getFullYear()
     );
   };
 
@@ -172,24 +148,51 @@ export default function CalendarComponent() {
     setSelectedEvent(event);
   };
 
-  const handleCloseDetails = () => {
-    setSelectedEvent(null); // Close event details and go back to calendar view
-  };
+     const handleContactUsClick = () => {
+       setShowContactForm(true);
+     };
+
+     const handleCloseContactForm = () => {
+       setShowContactForm(false);
+     };
+
+     if (showContactForm) {
+       return (
+         <div className="container m-auto p-4">
+           <ContactForm />
+           <button onClick={handleCloseContactForm} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg">
+             Back to Event
+           </button>
+         </div>
+       );
+     }
+
+
 
   if (selectedEvent) {
     return (
-      <div className=" container m-auto p-4">
+      <div className="container m-auto p-4 ">
         {/* Pass the selected event to the Article component */}
         <EventDetails event={selectedEvent} />
 
-        <div className="mt-4 ml-auto">
+        <div className="mt-4 ml-auto w-full flex justify-between">
           <button
             onClick={handleCloseDetails}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg"
           >
             Back to All Events
           </button>
+          <button
+                              onClick={handleContactUsClick}
+                              className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                            >
+                               Contact Us
+                            </button>
         </div>
+
+           <div className="mt-4 ml-auto">
+
+                </div>
       </div>
     );
   }
@@ -237,9 +240,9 @@ export default function CalendarComponent() {
                 </div>
                 {getEventsForDate(date).map((event) => (
                   <div
-                    key={event.id}
+                    key={event.event_id}
                     className={`w-full text-left mb-1 p-1 text-xs cursor-pointer ${
-                      event.type === "workshop"
+                      event.event_type === "workshop"
                         ? "bg-blue-100 text-blue-800"
                         : "bg-green-100 text-green-800"
                     }`}

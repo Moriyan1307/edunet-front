@@ -1,3 +1,4 @@
+// Updated Navigation component
 import React from "react";
 
 const Navigation = ({ activeTab, setActiveTab }) => {
@@ -5,9 +6,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
     <nav className="flex space-x-4">
       <button
         className={`px-4 py-2 rounded-md ${
-          activeTab === "fullTime"
-            ? "bg-gray-200 text-gray-800"
-            : "text-gray-600"
+          activeTab === "fullTime" ? "bg-gray-200 text-gray-800" : "text-gray-600"
         }`}
         onClick={() => setActiveTab("fullTime")}
       >
@@ -15,9 +14,7 @@ const Navigation = ({ activeTab, setActiveTab }) => {
       </button>
       <button
         className={`px-4 py-2 rounded-md ${
-          activeTab === "internships"
-            ? "bg-gray-200 text-gray-800"
-            : "text-gray-600"
+          activeTab === "internships" ? "bg-gray-200 text-gray-800" : "text-gray-600"
         }`}
         onClick={() => setActiveTab("internships")}
       >
