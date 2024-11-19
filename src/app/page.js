@@ -11,7 +11,7 @@ export default function Home() {
 
   if (isAuthenticated) {
     return (
-      <div className="p-2 overflow-y-auto scrollbar-none h-full">
+      <div className="p-2 overflow-y-auto scrollbar-none ">
         <p className="text-lg font-semibold mb-4 text-2xl">
           Welcome, <span className="text-black font-bold">{user.f_name}</span>!
         </p>

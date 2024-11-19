@@ -1,51 +1,126 @@
-// export default function Posts() {
-//   return <div>Post</div>;
-// }
+"use client";
 
-import React from "react";
-import { Button, Card, CardContent, Typography } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function Posts() {
+  const [posts, setPosts] = useState([]);
+  const [newPostContent, setNewPostContent] = useState("");
+
+  const user = useSelector((state) => state.auth.user);
+  const userId = user.user_id;
+
+  // Fetch posts
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await axiosInstance.get("/api/posts");
+        setPosts(response.data); // Assuming the API response has the posts array in the data property
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
+    };
+
+    fetchPosts();
+  }, [posts]);
+
+  // Handle new post submission
+  const handlePostSubmit = async () => {
+    try {
+      const response = await axiosInstance.post("/api/posts", {
+        user_id: userId, // Replace userId with the actual user ID
+        content: newPostContent,
+      });
+
+      if (response.status === 201) {
+        setNewPostContent(""); // Clear the input
+        const newPost = response.data;
+        setPosts((prevPosts) => [newPost, ...prevPosts]);
+      }
+    } catch (error) {
+      console.error("Error creating post:", error);
+    }
+  };
+
+  // Handle post like
+  const handleLikePost = async (postId) => {
+    try {
+      const response = await axiosInstance.post(`/api/posts/${postId}/like`, {
+        user_id: userId, // Replace with authenticated user's ID
+      });
+
+      if (response.status === 200) {
+        // Unlike: decrement like count
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.post_id === postId
+              ? { ...post, like_count: post.like_count - 1 }
+              : post
+          )
+        );
+      } else if (response.status === 201) {
+        // Like: increment like count
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.post_id === postId
+              ? { ...post, like_count: post.like_count + 1 }
+              : post
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    }
+  };
+
   return (
-    <div className="relative w-full h-full mx-auto ">
-      <div class="bg-gray-100 rounded-lg p-6 shadow-md  mx-auto">
-        <h2 class="text-sm font-bold text-black">NEW POST</h2>
-        <hr class="my-4 border-gray-400" />
-        <p class="text-xl font-normal text-black">What’s on your mind?</p>
-        <div class="flex justify-between mt-6">
+    <div className="relative overflow-y-auto w-full h-4/5 mx-auto">
+      {/* New Post Section */}
+      <div className="bg-gray-100 rounded-lg p-6 shadow-md mx-auto">
+        <h2 className="text-sm font-bold text-black">NEW POST</h2>
+        <hr className="my-4 border-gray-400" />
+        <p className="text-xl font-normal text-black">What’s on your mind?</p>
+        <div className="flex justify-between mt-6">
           <input
             type="textarea"
-            class="flex-1 p-2 mr-4 bg-gray-100"
+            className="flex-1 p-2 mr-4 bg-gray-100"
             placeholder="Type your post..."
+            value={newPostContent}
+            onChange={(e) => setNewPostContent(e.target.value)}
           />
-          <button class="bg-black text-white py-2 px-10 rounded-lg">
+          <button
+            onClick={handlePostSubmit}
+            className="bg-black text-white py-2 px-10 rounded-lg"
+          >
             Post
           </button>
         </div>
       </div>
 
       {/* Post Content Section */}
-      <div className="absolute w-full  h-auto top-[347px] left-0 p-4">
-        <div className="bg-gray-100 rounded-[15px] p-6">
-          <h3 className="text-3xl font-bold text-[#181818]">Theresa Steward</h3>
-          <p className="text-lg text-[#181818]">Mentor</p>
-          <p className="text-base text-[#181818] leading-7 mt-4">
-            What did the Dursleys care if Harry lost his place on the House
-            Quidditch team because he hadn’t practiced all summer? What was it
-            to the Dursleys if Harry went back to school without any of his
-            homework done? The Dursleys were what wizards called Muggles (not a
-            drop of magical blood in their veins).
-          </p>
-
-          <div className="flex justify-between mt-6">
-            <div className="flex items-center">
-              <span className="text-2xl text-[#181818]">15</span>
-            </div>
-            <div className="flex items-center">
-              <span className="text-2xl text-[#181818]">9</span>
+      <div className="mt-6 space-y-6">
+        {posts.map((post, ind) => (
+          <div key={ind} className="bg-gray-100 rounded-lg p-6">
+            <h3 className="text-xl font-bold text-[#181818]">
+              {post.user_name}
+            </h3>
+            <p className="text-base text-[#181818] mt-2">{post.content}</p>
+            <div className="flex justify-between items-center mt-4">
+              <div className="flex items-center">
+                <button
+                  onClick={() => handleLikePost(post.post_id)}
+                  className="text-black"
+                >
+                  👍 {post.like_count}
+                </button>
+              </div>
+              <span className="text-sm text-gray-500">
+                {new Date(post.created_at).toLocaleString()}
+              </span>
             </div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );
