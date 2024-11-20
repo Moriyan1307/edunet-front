@@ -2,6 +2,59 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axiosInstance from "../../utils/axiosInstance";
 
+const NotificationSettings = () => {
+  const user = useSelector((state) => state.auth.user);
+  const [emailPreference, setEmailPreference] = useState(true);
+
+  useEffect(() => {
+    const fetchPreference = async () => {
+      try {
+        const response = await axiosInstance.get(
+          `/users/users/preferences?user_id=${user.user_id}`
+        );
+        setEmailPreference(response.data.receive_email_notifications);
+      } catch (error) {
+        console.error("Error fetching preferences:", error);
+      }
+    };
+
+    fetchPreference();
+  }, []);
+
+  const handleToggle = async () => {
+    try {
+      const updatedPreference = !emailPreference;
+      setEmailPreference(updatedPreference);
+
+      await axiosInstance.put("/users/users/preferences", {
+        user_id: user.user_id,
+        receive_email_notifications: updatedPreference,
+      });
+
+      console.log("Preference updated");
+    } catch (error) {
+      console.error("Error updating preference:", error);
+    }
+  };
+
+  return (
+    <div className="settings-container">
+      <h2>Notification Settings</h2>
+      <div className="preference">
+        <span>Receive Email Notifications</span>
+        <label className="toggle-switch">
+          <input
+            type="checkbox"
+            checked={emailPreference}
+            onChange={handleToggle}
+          />
+          <span className="slider"></span>
+        </label>
+      </div>
+    </div>
+  );
+};
+
 // InputField Component
 const InputField = ({
   label,
@@ -51,35 +104,6 @@ const SelectField = ({ label, name, options, value, handleChange, error }) => (
       ))}
     </select>
     {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-  </div>
-);
-
-// NotificationPreference Component
-const NotificationPreference = ({ enabled, onToggle }) => (
-  <div className="mt-4 p-4 border border-gray-300 rounded-md">
-    <div className="flex items-center justify-between">
-      <label htmlFor="notification_toggle" className="text-base font-normal">
-        Notification Preference
-      </label>
-      <button
-        id="notification_toggle"
-        onClick={onToggle}
-        className={`w-14 h-8 rounded-full ${
-          enabled ? "bg-green-500" : "bg-gray-400"
-        } flex items-center transition duration-300 focus:outline-none`}
-      >
-        <span
-          className={`h-6 w-6 bg-white rounded-full shadow-md transform transition duration-300 ${
-            enabled ? "translate-x-6" : "translate-x-1"
-          }`}
-        />
-      </button>
-    </div>
-    <p className="text-sm text-gray-500 mt-2">
-      {enabled
-        ? "Notifications enabled. You will receive updates and alerts via email."
-        : "Notifications disabled. You will not receive email updates."}
-    </p>
   </div>
 );
 
@@ -277,10 +301,7 @@ const SettingsForm = () => {
           handleChange={handleChange}
           error={errors.graduation_year}
         />
-        <NotificationPreference
-          enabled={formData.notifications_enabled}
-          onToggle={handleNotificationToggle}
-        />
+
         <div className="flex justify-end mt-6">
           <button
             type="submit"
@@ -290,6 +311,7 @@ const SettingsForm = () => {
           </button>
         </div>
       </form>
+      <NotificationSettings />
     </div>
   );
 };

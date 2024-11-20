@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axiosInstance from "../../utils/axiosInstance"; // Ensure you have a configured axios instance
+import axiosInstance from "../../utils/axiosInstance";
 
 const SignUpForm = () => {
   const [formData, setFormData] = useState({
@@ -8,11 +8,11 @@ const SignUpForm = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    phone: "", // Initialize as an empty string
-    occupation: "",
+    phone: "",
     major: "",
     graduationYear: "",
     interests: "",
+    role_id: "", // Role ID based on the user's occupation
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -49,10 +49,13 @@ const SignUpForm = () => {
       errors.confirmPassword = "Passwords do not match";
     }
     if (!formData.phone) errors.phone = "Phone number is required";
-    if (!formData.occupation) errors.occupation = "Occupation is required";
+    if (!formData.role_id) errors.role_id = "Role is required";
     if (!formData.major) errors.major = "Major is required";
-    if (!formData.graduationYear)
+    if (!formData.graduationYear) {
       errors.graduationYear = "Graduation year is required";
+    } else if (!/^\d{4}$/.test(formData.graduationYear)) {
+      errors.graduationYear = "Graduation year must be a valid 4-digit year";
+    }
     if (!formData.interests) errors.interests = "Interests are required";
 
     return errors;
@@ -60,23 +63,29 @@ const SignUpForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const errors = validateForm();
     if (Object.keys(errors).length === 0) {
       try {
-        // Send a POST request to the backend API
-        const response = await axiosInstance.post("/users/register", {
+        const requestData = {
           f_name: formData.firstName,
           l_name: formData.lastName,
           email: formData.email,
-          password: formData.password, // Assuming backend will hash the password
-          phone_number: formData.phone.toString(), // Convert to string if needed
-          image_url: "https://example.com/static-image.jpg", // Static image URL
-          occupation: formData.occupation,
+          password_hash: formData.password, // Password hashing will be done on the backend
+          phone_number: formData.phone,
+          image_url: "https://example.com/static-image.jpg", // Placeholder image
+          role_id: parseInt(formData.role_id), // Role ID (1: Student, 2: Mentor, 3: Alumni)
           major: formData.major,
-          graduation_year: formData.graduationYear,
+          graduation_year: parseInt(formData.graduationYear),
           interests: formData.interests,
-        });
+        };
+
+        const response = await axiosInstance.post(
+          "/users/register",
+          requestData
+        );
         console.log("Registration successful:", response.data);
+
         setIsRegistered(true);
       } catch (error) {
         console.error(
@@ -131,22 +140,20 @@ const SignUpForm = () => {
             </div>
           </div>
 
-          <div>
-            <input
-              type="email"
-              name="email"
-              placeholder="Email*"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
-            />
-            {formErrors.email && (
-              <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
-            )}
-          </div>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email*"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md"
+          />
+          {formErrors.email && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="relative">
+            <div>
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
@@ -158,7 +165,7 @@ const SignUpForm = () => {
               <button
                 type="button"
                 onClick={handleTogglePassword}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                className="text-gray-500"
               >
                 👁️
               </button>
@@ -168,7 +175,7 @@ const SignUpForm = () => {
                 </p>
               )}
             </div>
-            <div className="relative">
+            <div>
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
@@ -180,7 +187,7 @@ const SignUpForm = () => {
               <button
                 type="button"
                 onClick={handleToggleConfirmPassword}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                className="text-gray-500"
               >
                 👁️
               </button>
@@ -204,46 +211,45 @@ const SignUpForm = () => {
             <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="major"
-              placeholder="Major"
-              value={formData.major}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
-            />
-            {formErrors.major && (
-              <p className="text-red-500 text-sm mt-1">{formErrors.major}</p>
-            )}
-            <input
-              type="text"
-              name="graduationYear"
-              placeholder="Graduation Year"
-              value={formData.graduationYear}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
-            />
-            {formErrors.graduationYear && (
-              <p className="text-red-500 text-sm mt-1">
-                {formErrors.graduationYear}
-              </p>
-            )}
-          </div>
+          <input
+            type="text"
+            name="major"
+            placeholder="Major"
+            value={formData.major}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md"
+          />
+          {formErrors.major && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.major}</p>
+          )}
+
+          <input
+            type="text"
+            name="graduationYear"
+            placeholder="Graduation Year"
+            value={formData.graduationYear}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md"
+          />
+          {formErrors.graduationYear && (
+            <p className="text-red-500 text-sm mt-1">
+              {formErrors.graduationYear}
+            </p>
+          )}
 
           <select
-            name="occupation"
-            value={formData.occupation}
+            name="role_id"
+            value={formData.role_id}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-md"
           >
-            <option value="">Occupation</option>
-            <option value="Student">Student</option>
-            <option value="Professional">Professional</option>
-            <option value="Other">Other</option>
+            <option value="">Role</option>
+            <option value="1">Student</option>
+            <option value="2">Mentor</option>
+            <option value="3">Alumni</option>
           </select>
-          {formErrors.occupation && (
-            <p className="text-red-500 text-sm mt-1">{formErrors.occupation}</p>
+          {formErrors.role_id && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.role_id}</p>
           )}
 
           <input
