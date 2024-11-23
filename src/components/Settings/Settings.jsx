@@ -10,7 +10,7 @@ const NotificationSettings = () => {
     const fetchPreference = async () => {
       try {
         const response = await axiosInstance.get(
-          `/users/preferences?user_id=${user.user_id}`
+          `/users/users/preferences?user_id=${user.user_id}`
         );
         setEmailPreference(response.data.receive_email_notifications);
       } catch (error) {
