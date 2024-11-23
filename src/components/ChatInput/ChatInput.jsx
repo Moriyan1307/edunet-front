@@ -4,7 +4,7 @@ import axiosInstance from "../../utils/axiosInstance";
 
 const MessageInput = ({ conversationId, onMessageSent }) => {
   const [message, setMessage] = useState("");
-  const currentUserId = useSelector((state) => state.auth.user.user_id);
+  const currentUserId = useSelector((state) => state.auth.user?.user_id);
 
   const sendMessage = async () => {
     if (message.trim() === "" || !conversationId) return;

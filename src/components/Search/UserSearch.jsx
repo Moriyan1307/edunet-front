@@ -10,8 +10,13 @@ const UserSearch = () => {
   const [noResults, setNoResults] = useState(false);
   const dropdownRef = useRef(null);
 
+<<<<<<< Updated upstream
   const currentUserId = useSelector((state) => state.auth.user.user_id);
   const router = useRouter(); // Use router for navigation
+=======
+  const currentUserId = useSelector((state) => state.auth.user?.user_id);
+  const router = useRouter();
+>>>>>>> Stashed changes
 
   const handleSearch = async () => {
     if (searchTerm.trim() === "") {

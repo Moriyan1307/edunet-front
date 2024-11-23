@@ -90,11 +90,12 @@ const SettingsForm = () => {
     l_name: "",
     email: "",
     phone_number: "",
-    role_id: "",
+    role_id: user?.role_id || "",
     interests: "",
     major: "",
     graduation_year: "",
-    user_id: user.user_id,
+    university: "",
+    user_id: user?.user_id,
     notifications_enabled: false, // Added notification preference field
   });
   const [initialData, setInitialData] = useState(null); // To hold fetched initial data for comparison
@@ -118,6 +119,7 @@ const SettingsForm = () => {
           graduation_year: fetchedUser.graduation_year
             ? fetchedUser.graduation_year.toString()
             : "",
+          university: fetchedUser.university || "",
           notifications_enabled: fetchedUser.notifications_enabled,
         };
 
@@ -129,7 +131,7 @@ const SettingsForm = () => {
     };
 
     fetchUserData();
-  }, [user.user_id]);
+  }, [user?.user_id]);
 
   const validateField = (name, value) => {
     switch (name) {
@@ -236,18 +238,20 @@ const SettingsForm = () => {
             handleChange={handleChange}
             error={errors.phone_number}
           />
-          <SelectField
-            label="Role"
-            name="role_id"
-            value={formData.role_id}
-            options={[
-              { label: "Student", value: 1 },
-              { label: "Mentor", value: 2 },
-              { label: "Alumni", value: 3 },
-            ]}
-            handleChange={handleChange}
-            error={errors.role_id}
-          />
+
+          {user?.role_id === 1 || user?.role_id === 3 ? (
+            <SelectField
+              label="Role"
+              name="role_id"
+              value={formData.role_id}
+              options={[
+                { label: "Student", value: 1 },
+                { label: "Alumni", value: 3 },
+              ]}
+              handleChange={handleChange}
+              error={errors.role_id}
+            />
+          ) : null}
         </div>
         <div className="grid grid-cols-2 gap-4">
           <SelectField
@@ -255,9 +259,11 @@ const SettingsForm = () => {
             name="interests"
             value={formData.interests}
             options={[
-              { label: "Front-end Dev", value: "Front-end Dev" },
-              { label: "Back-end Dev", value: "Back-end Dev" },
-              { label: "Full-stack Dev", value: "Full-stack Dev" },
+              { label: "Front End", value: "Front End" },
+              { label: "Back End", value: "Back End" },
+              { label: "Full Stack", value: "Full Stack" },
+              { label: "AI/ML", value: "AI/ML" },
+              { label: "Data Science", value: "Data Science" },
             ]}
             handleChange={handleChange}
             error={errors.interests}
@@ -270,6 +276,16 @@ const SettingsForm = () => {
             error={errors.major}
           />
         </div>
+
+        <div className="grid grid-cols-2 gap-4">
+        <InputField
+          label="University Name"
+          name="university"
+          value={formData.university}
+          handleChange={handleChange}
+          error={errors.university}
+        />
+
         <InputField
           label="Graduation Year"
           name="graduation_year"
@@ -277,10 +293,15 @@ const SettingsForm = () => {
           handleChange={handleChange}
           error={errors.graduation_year}
         />
+<<<<<<< Updated upstream
         <NotificationPreference
           enabled={formData.notifications_enabled}
           onToggle={handleNotificationToggle}
         />
+=======
+       </div>
+
+>>>>>>> Stashed changes
         <div className="flex justify-end mt-6">
           <button
             type="submit"

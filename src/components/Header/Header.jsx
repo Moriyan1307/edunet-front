@@ -19,6 +19,10 @@ export default function Header() {
   const isLoggedIn = state.isAuthenticated;
   const currentUser = state.user;
   const userId = currentUser ? currentUser.user_id : null;
+<<<<<<< Updated upstream
+=======
+  const userEmail = currentUser ? currentUser.email : null;
+>>>>>>> Stashed changes
 
   const dispatch = useDispatch();
 
