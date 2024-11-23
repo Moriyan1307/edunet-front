@@ -22,7 +22,7 @@ const NotificationSettings = () => {
       const updatedPreference = !emailPreference;
       setEmailPreference(updatedPreference);
 
-      await axiosInstance.put("/users/preferences", {
+      await axiosInstance.put("/users/users/preferences", {
         receive_email_notifications: updatedPreference,
       });
 
