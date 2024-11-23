@@ -4,7 +4,7 @@ import axiosInstance from "../../utils/axiosInstance";
 
 const ChatWindow = ({ conversationId, messages, user }) => {
   const [fetchedMessages, setFetchedMessages] = useState([]);
-  const currentUserId = useSelector((state) => state.auth.user?.user_id);
+  const currentUserId = useSelector((state) => state.auth.user.user_id);
 
   useEffect(() => {
     const fetchMessages = async () => {

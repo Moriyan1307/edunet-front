@@ -31,7 +31,7 @@ const InputField = ({
 
 const MentorshipForm = ({ onBack, mentorId }) => {
   console.log(mentorId);
-  const currentUserId = useSelector((state) => state.auth.user?.user_id);
+  const currentUserId = useSelector((state) => state.auth.user.user_id); // Get student_id from Redux
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
