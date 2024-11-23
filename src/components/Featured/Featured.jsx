@@ -3,40 +3,41 @@ import { useSelector } from "react-redux";
 import axiosInstance from "../../utils/axiosInstance"; // Adjust the path as needed
 import { useRouter } from "next/navigation";
 
-const events = [
-  {
-    id: 1,
-    name: "Create An LMS Website With EduNet",
-    date: "Sept 25, 2024",
-  },
-  {
-    id: 2,
-    name: "JavaScript Frameworks Webinar",
-    date: "Oct 10, 2024",
-  },
-  {
-    id: 3,
-    name: "React Native Conference",
-    date: "Nov 15, 2024",
-  },
-];
-
 export default function FeaturedProfile() {
   const [featuredProfiles, setFeaturedProfiles] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [userInterests, setUserInterests] = useState([]);
   const isLoggedIn = useSelector((state) => state.auth.isAuthenticated);
-  const user = useSelector((state) => state.auth.user);
+  const currentUserId = useSelector((state) => state.auth.user?.user_id);
   const router = useRouter();
 
+  // Fetch the user data to update interests
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!currentUserId) return;
+
+      try {
+        const response = await axiosInstance.get(`/users/${currentUserId}`);
+        setUserInterests(response.data?.interests || []);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+      }
+    };
+
+    fetchUserData();
+  }, [currentUserId]);
+
+  // Fetch featured profiles based on updated interests
   useEffect(() => {
     const fetchFeaturedProfiles = async () => {
-      if (user?.interests) {
+      if (userInterests.length > 0) {
         try {
           const response = await axiosInstance.get("/users/api/featured", {
-            params: { interests: user.interests },
+            params: { interests: userInterests },
           });
 
           const profiles = response.data.filter(
-            (profile) => profile.user_id !== user.user_id
+            (profile) => profile.user_id !== currentUserId
           );
           setFeaturedProfiles(profiles);
         } catch (error) {
@@ -45,15 +46,40 @@ export default function FeaturedProfile() {
       }
     };
 
+    fetchFeaturedProfiles();
+  }, [userInterests, currentUserId]);
+
+  // Fetch upcoming events
+  useEffect(() => {
+    const fetchUpcomingEvents = async () => {
+      if (currentUserId) {
+        try {
+          const response = await axiosInstance.get("/events", {
+            params: { user_id: currentUserId },
+          });
+
+          // Filter out past events based on the current date
+          const now = new Date();
+          const upcoming = response.data.filter(
+            (event) => new Date(event.start_time) > now
+          );
+          setUpcomingEvents(upcoming);
+        } catch (error) {
+          console.error("Error fetching upcoming events:", error);
+        }
+      }
+    };
+
     if (isLoggedIn) {
-      fetchFeaturedProfiles();
+      fetchUpcomingEvents();
     }
-  }, [isLoggedIn, user?.interests, user?.user_id]);
+  }, [isLoggedIn, currentUserId]);
 
   if (!isLoggedIn) return null;
 
   return (
     <div className="w-3/12 bg-white p-5 shadow-md h-full">
+      {/* Featured Profiles Section */}
       <div className="p-2">
         <h2 className="text-xl font-semibold border-b pb-2 text-center">
           Featured Profiles
@@ -89,31 +115,41 @@ export default function FeaturedProfile() {
         </div>
       </div>
 
+      {/* Upcoming Events Section */}
       <div className="p-2">
         <h2 className="text-xl font-semibold border-b pb-2 text-center">
-          Events
+          Upcoming Events
         </h2>
         <div className="mt-4">
-          {events.map((event) => (
-            <div
-              key={event.id}
-              className="flex items-center justify-between py-3"
-            >
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-gray-100 flex items-center justify-center rounded-full mr-3">
-                  <img
-                    src="/calendar-icon.svg"
-                    alt="Event Icon"
-                    className="w-6 h-6"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm">{event.name}</p>
-                  <p className="text-xs text-gray-500">{event.date}</p>
+          {upcomingEvents.length > 0 ? (
+            upcomingEvents.map((event) => (
+              <div
+                key={event.event_id}
+                onClick={() => router.push(`/events`)}
+                className="flex items-center justify-between py-3"
+              >
+                <div className="flex items-center">
+                  <div className="w-10 h-10 bg-gray-100 flex items-center justify-center rounded-full mr-3">
+                    <img
+                      src={event.image_url}
+                      alt="Event Icon"
+                      className="w-6 h-6"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm">{event.title}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(event.start_time).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-gray-500 text-center">
+              No upcoming events available
+            </p>
+          )}
         </div>
       </div>
     </div>

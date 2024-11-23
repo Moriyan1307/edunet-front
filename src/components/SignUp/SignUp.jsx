@@ -12,6 +12,8 @@ const SignUpForm = () => {
     major: "",
     graduationYear: "",
     interests: "",
+    university: "", // University name field
+    imageUploadUrl: "", // Image upload URL field
     role_id: "", // Role ID based on the user's occupation
   });
 
@@ -58,6 +60,17 @@ const SignUpForm = () => {
     }
     if (!formData.interests) errors.interests = "Interests are required";
 
+    // Optional fields: Add validation if provided
+    if (formData.university && formData.university.length < 3) {
+      errors.university = "University name must be at least 3 characters long";
+    }
+    if (
+      formData.imageUploadUrl &&
+      !/^https?:\/\//.test(formData.imageUploadUrl)
+    ) {
+      errors.imageUploadUrl = "Image URL must be a valid URL";
+    }
+
     return errors;
   };
 
@@ -73,11 +86,12 @@ const SignUpForm = () => {
           email: formData.email,
           password_hash: formData.password, // Password hashing will be done on the backend
           phone_number: formData.phone,
-          image_url: "https://example.com/static-image.jpg", // Placeholder image
+          image_url: formData.imageUploadUrl || "https://example.com/static-image.jpg", // Default image if not provided
           role_id: parseInt(formData.role_id), // Role ID (1: Student, 2: Mentor, 3: Alumni)
           major: formData.major,
           graduation_year: parseInt(formData.graduationYear),
           interests: formData.interests,
+          university: formData.university || "", // Optional field
         };
 
         const response = await axiosInstance.post(
@@ -243,7 +257,9 @@ const SignUpForm = () => {
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-md"
           >
-            <option value="">Role</option>
+            <option value="" disabled>
+              Select Role
+            </option>
             <option value="1">Student</option>
             <option value="2">Mentor</option>
             <option value="3">Alumni</option>
@@ -252,16 +268,49 @@ const SignUpForm = () => {
             <p className="text-red-500 text-sm mt-1">{formErrors.role_id}</p>
           )}
 
-          <input
-            type="text"
+          <select
             name="interests"
-            placeholder="Interests"
             value={formData.interests}
             onChange={handleChange}
             className="w-full px-3 py-2 border rounded-md"
-          />
+          >
+            <option value="" disabled>
+              Select Interest
+            </option>
+            <option value="Front End">Front End</option>
+            <option value="Back End">Back End</option>
+            <option value="Full Stack">Full Stack</option>
+            <option value="AI/ML">AI/ML</option>
+            <option value="Data Science">Data Science</option>
+          </select>
           {formErrors.interests && (
             <p className="text-red-500 text-sm mt-1">{formErrors.interests}</p>
+          )}
+
+          <input
+            type="text"
+            name="university"
+            placeholder="University Name (Optional)"
+            value={formData.university}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md"
+          />
+          {formErrors.university && (
+            <p className="text-red-500 text-sm mt-1">{formErrors.university}</p>
+          )}
+
+          <input
+            type="text"
+            name="imageUploadUrl"
+            placeholder="Image Upload URL (Optional)"
+            value={formData.imageUploadUrl}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md"
+          />
+          {formErrors.imageUploadUrl && (
+            <p className="text-red-500 text-sm mt-1">
+              {formErrors.imageUploadUrl}
+            </p>
           )}
 
           <button

@@ -10,7 +10,7 @@ const UserSearch = () => {
   const [noResults, setNoResults] = useState(false);
   const dropdownRef = useRef(null);
 
-  const currentUserId = useSelector((state) => state.auth.user.user_id);
+  const currentUserId = useSelector((state) => state.auth.user?.user_id);
   const router = useRouter();
 
   const handleSearch = async () => {
