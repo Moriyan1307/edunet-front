@@ -8,7 +8,7 @@ const ChatList = ({ onConversationChange }) => {
   const [groupConversations, setGroupConversations] = useState([]);
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
-  const currentUserId = useSelector((state) => state.auth.user.user_id);
+  const currentUserId = useSelector((state) => state.auth.user?.user_id);
 
   // Fetch private (one-on-one) conversations
   const fetchPrivateConversations = async () => {
@@ -16,7 +16,13 @@ const ChatList = ({ onConversationChange }) => {
       const response = await axiosInstance.get(
         `/conversations/user-conversations/one-on-one/${currentUserId}`
       );
-      setPrivateConversations(response.data);
+      // Process private conversations and set them as private with no participant flag
+      const updatedPrivateConversations = response.data.map((conversation) => ({
+        ...conversation,
+        is_private: true, // Private conversations are marked as `true`
+        is_participant: true, // No need to join for private chats
+      }));
+      setPrivateConversations(updatedPrivateConversations);
     } catch (error) {
       console.error("Error fetching private conversations:", error);
     }
@@ -28,7 +34,15 @@ const ChatList = ({ onConversationChange }) => {
       const response = await axiosInstance.get(
         `/conversations/group-conversations/${currentUserId}`
       );
-      setGroupConversations(response.data);
+
+      // Process group conversations: set `is_private: false`, and `is_participant` based on the response
+      const updatedGroupConversations = response.data.map((conversation) => ({
+        ...conversation,
+        is_private: false, // Group chats are marked as `false`
+        is_participant: conversation.is_participant || false, // User participation status
+      }));
+
+      setGroupConversations(updatedGroupConversations);
     } catch (error) {
       console.error("Error fetching group conversations:", error);
     }
@@ -40,10 +54,22 @@ const ChatList = ({ onConversationChange }) => {
   }, [currentUserId]);
 
   const handleConversationClick = (conversation) => {
-    setSelectedConversationId(conversation.conversation_id);
-    onConversationChange(conversation.conversation_id, {
-      display_name: conversation.display_name,
-    });
+    // For private conversations, no joining required
+    if (conversation.is_private) {
+      setSelectedConversationId(conversation.conversation_id);
+      onConversationChange(conversation.conversation_id, {
+        display_name: conversation.display_name,
+      });
+    }
+    // For group conversations, user needs to join first
+    else if (!conversation.is_participant) {
+      alert("You need to join the group before accessing the chat.");
+    } else {
+      setSelectedConversationId(conversation.conversation_id);
+      onConversationChange(conversation.conversation_id, {
+        display_name: conversation.display_name,
+      });
+    }
   };
 
   const handleJoinGroup = async (conversationId) => {
@@ -52,7 +78,15 @@ const ChatList = ({ onConversationChange }) => {
         userId: currentUserId,
         conversationId,
       });
-      fetchGroupConversations(); // Refetch group conversations to update joined groups
+
+      // Update `is_participant` locally after joining
+      setGroupConversations((prevConversations) =>
+        prevConversations.map((conversation) =>
+          conversation.conversation_id === conversationId
+            ? { ...conversation, is_participant: true }
+            : conversation
+        )
+      );
     } catch (error) {
       console.error("Error joining group:", error);
     }
@@ -81,28 +115,38 @@ const ChatList = ({ onConversationChange }) => {
       {/* Private Chats Section */}
       <div>
         <h3 className="text-md font-semibold mb-2">Private Chats</h3>
-        {privateConversations.map((conversation) => (
-          <div
-            key={conversation.conversation_id}
-            onClick={() => handleConversationClick(conversation)}
-            className={`flex items-center space-x-3 mb-4 cursor-pointer p-2 rounded-lg ${
-              conversation.conversation_id === selectedConversationId
-                ? "bg-blue-100"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            <img
-              src={conversation.image_url || "/path_to_default_avatar.jpg"}
-              alt={`${conversation.display_name}`}
-              className="w-12 h-12 rounded-full"
-            />
-            <div>
-              <p className="text-gray-900 font-medium">
-                {conversation.display_name}
-              </p>
+        {privateConversations.map((conversation) => {
+          // Ensure is_private is true for private conversations
+          const is_private = conversation.is_private === undefined ? true : conversation.is_private;  // Default to true if undefined
+
+          return (
+            <div
+              key={conversation.conversation_id}
+              onClick={() => {
+                // Only handle click for private conversations
+                if (is_private) {
+                  handleConversationClick(conversation);
+                }
+              }}
+              className={`flex items-center space-x-3 mb-4 cursor-pointer p-2 rounded-lg ${
+                conversation.conversation_id === selectedConversationId
+                  ? "bg-blue-100"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              <img
+                src={conversation.image_url || "/path_to_default_avatar.jpg"}
+                alt={`${conversation.display_name}`}
+                className="w-12 h-12 rounded-full"
+              />
+              <div>
+                <p className="text-gray-900 font-medium">
+                  {conversation.display_name}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Group Chats Section */}
