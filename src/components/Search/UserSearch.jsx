@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useSelector } from "react-redux";
-import { useRouter } from "next/navigation"; // Import the Next.js router
+import { useRouter } from "next/navigation";
 import axiosInstance from "../../utils/axiosInstance";
 
 const UserSearch = () => {
@@ -10,13 +10,8 @@ const UserSearch = () => {
   const [noResults, setNoResults] = useState(false);
   const dropdownRef = useRef(null);
 
-<<<<<<< Updated upstream
   const currentUserId = useSelector((state) => state.auth.user.user_id);
-  const router = useRouter(); // Use router for navigation
-=======
-  const currentUserId = useSelector((state) => state.auth.user?.user_id);
   const router = useRouter();
->>>>>>> Stashed changes
 
   const handleSearch = async () => {
     if (searchTerm.trim() === "") {
@@ -30,8 +25,13 @@ const UserSearch = () => {
         params: { searchTerm },
       });
 
-      if (response.data.length > 0) {
-        setSearchResults(response.data);
+      // Filter out the current user from the search results
+      const filteredResults = response.data.filter(
+        (user) => user.user_id !== currentUserId
+      );
+
+      if (filteredResults.length > 0) {
+        setSearchResults(filteredResults);
         setNoResults(false);
       } else {
         setSearchResults([]);
@@ -52,7 +52,6 @@ const UserSearch = () => {
     }
   };
 
-  // Start a conversation with a user
   const startConversation = async (userId) => {
     try {
       const response = await axiosInstance.post(
@@ -62,12 +61,10 @@ const UserSearch = () => {
           current_user_id: currentUserId,
         }
       );
-      // Clear search term, search results, and close dropdown
       setSearchTerm("");
       setSearchResults([]);
       setIsDropdownOpen(false);
 
-      // Redirect to networking page after starting conversation
       router.push("/networking");
     } catch (error) {
       console.error("Error starting conversation:", error);
@@ -82,7 +79,6 @@ const UserSearch = () => {
         onChange={(e) => {
           setSearchTerm(e.target.value);
           if (e.target.value.trim() === "") {
-            // Clear results if input is empty
             setSearchResults([]);
             setNoResults(false);
           } else {
@@ -120,7 +116,7 @@ const UserSearch = () => {
                   </div>
                   <button
                     onClick={(e) => {
-                      e.preventDefault(); // Prevent dropdown close on click
+                      e.preventDefault();
                       startConversation(user.user_id);
                     }}
                     className="bg-blue-500 text-white px-3 py-1 rounded-md"

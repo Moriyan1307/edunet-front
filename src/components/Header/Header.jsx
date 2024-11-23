@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -13,16 +13,14 @@ export default function Header() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const previousNotifications = useRef([]);
 
   const router = useRouter();
   const state = useSelector((state) => state.auth);
   const isLoggedIn = state.isAuthenticated;
   const currentUser = state.user;
   const userId = currentUser ? currentUser.user_id : null;
-<<<<<<< Updated upstream
-=======
-  const userEmail = currentUser ? currentUser.email : null;
->>>>>>> Stashed changes
+  const userEmail = state.user.email;
 
   const dispatch = useDispatch();
 
@@ -34,15 +32,51 @@ export default function Header() {
     }
   }, [currentUser]);
 
+  const sendEmailNotification = async () => {
+    if (!userEmail) {
+      console.error("User email is not available");
+      return;
+    }
+
+    try {
+      await axiosInstance.post("/send", {
+        to: userEmail,
+        subject: "New Notification",
+        text: `You have a new notification. Please check your Messages for details.`,
+      });
+      console.log("Email notification sent successfully.");
+    } catch (error) {
+      console.error("Error sending email notification:", error);
+    }
+  };
+
   // Function to fetch notifications and update unread count
   const fetchNotifications = async () => {
     try {
       const response = await axiosInstance.get(`/notifications`);
       const filteredNotifications = response.data.filter(
-        (notification) => notification.user_id === userId && notification.is_read === 0
+        (notification) =>
+          notification.user_id === userId && notification.is_read === 0
       );
+
+      // Check if new notifications are added
+      if (filteredNotifications.length > previousNotifications.current.length) {
+        const newNotifications = filteredNotifications.filter(
+          (notification) =>
+            !previousNotifications.current.some(
+              (prevNotif) =>
+                prevNotif.notification_id === notification.notification_id
+            )
+        );
+
+        // Send email notifications for the new notifications
+        newNotifications.forEach((notification) => sendEmailNotification());
+      }
+
+      // Update state and ref
       setNotifications(filteredNotifications);
       setUnreadCount(filteredNotifications.length);
+      previousNotifications.current = filteredNotifications; // Update previous notifications
     } catch (error) {
       console.error("Error fetching notifications", error);
     }
@@ -112,6 +146,13 @@ export default function Header() {
             <span>
               {user ? user.f_name : "Guest"} {user ? user.l_name : ""}
             </span>
+
+            <button
+              className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900"
+              onClick={sendEmailNotification}
+            >
+              Send
+            </button>
             <button
               className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-900"
               onClick={handleLogout}

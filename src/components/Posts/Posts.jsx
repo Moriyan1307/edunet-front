@@ -23,7 +23,7 @@ export default function Posts() {
     };
 
     fetchPosts();
-  }, [posts]);
+  }, []);
 
   // Handle new post submission
   const handlePostSubmit = async () => {
@@ -47,7 +47,7 @@ export default function Posts() {
   const handleLikePost = async (postId) => {
     try {
       const response = await axiosInstance.post(`/api/posts/${postId}/like`, {
-        user_id: userId, // Replace with authenticated user's ID
+        user_id: userId,
       });
 
       if (response.status === 200) {

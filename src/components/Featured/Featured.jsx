@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import axiosInstance from "../../utils/axiosInstance"; // Adjust the path as needed
+import { useRouter } from "next/navigation";
 
 export default function FeaturedProfile() {
   const [featuredProfiles, setFeaturedProfiles] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const isLoggedIn = useSelector((state) => state.auth.isAuthenticated);
   const user = useSelector((state) => state.auth.user);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchFeaturedProfiles = async () => {
@@ -61,7 +63,11 @@ export default function FeaturedProfile() {
         <div className="mt-4">
           {featuredProfiles.length > 0 ? (
             featuredProfiles.map((profile) => (
-              <div key={profile.user_id} className="flex items-center py-3">
+              <div
+                key={profile.user_id}
+                onClick={() => router.push(`/networking`)}
+                className="flex items-center py-3"
+              >
                 <img
                   src={profile.image_url || "/default_avatar.jpg"}
                   alt={profile.f_name}
