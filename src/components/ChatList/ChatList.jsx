@@ -170,7 +170,7 @@ const ChatList = ({ onConversationChange }) => {
           >
             <div className="flex items-center space-x-3">
               <img
-                src={conversation.display_name || "/path_to_default_avatar.jpg"}
+                src={"https://as1.ftcdn.net/v2/jpg/03/14/44/10/1000_F_314441066_71MAdbGS0XiIr1vxgIyGJEZCIHebslTp.jpg"}
                 alt={conversation.display_name}
                 className="w-12 h-12 rounded-full"
               />

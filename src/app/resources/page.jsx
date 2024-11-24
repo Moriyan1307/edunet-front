@@ -41,7 +41,7 @@ const Resources = () => {
       <div className="flex flex-grow mt-4">
         {activeTab === "career" ? (
           <CareerDevelopment />
-        ) : currentUser.role_id === 2 ? (
+        ) : currentUser?.role_id === 2 ? (
           <EnrolledStudents mentorId={currentUser.user_id} />
         ) : showMentorshipForm ? (
           <MentorshipForm

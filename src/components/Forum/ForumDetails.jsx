@@ -15,7 +15,7 @@ const ForumDetails = ({ forumId }) => {
   const [newPost, setNewPost] = useState("");
 
   const user = useSelector((state) => state.auth.user);
-  const userId = user.user_id;
+  const userId = user?.user_id;
 
   useEffect(() => {
     const fetchForumDetails = async () => {

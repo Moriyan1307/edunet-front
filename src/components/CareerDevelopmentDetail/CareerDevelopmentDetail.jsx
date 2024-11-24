@@ -20,7 +20,7 @@ const CareerDevelopmentDetail = ({ article, onClose }) => {
         </button>
         <h2 className="text-2xl font-bold mb-4">{article.title}</h2>
         <img
-          src={""}
+          src={article.image_url}
           alt={article.title}
           className="w-full h-48 object-cover rounded mb-4"
         />

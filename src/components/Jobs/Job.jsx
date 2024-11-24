@@ -17,7 +17,7 @@ const Jobs = () => {
   const [jobListings, setJobListings] = useState([]);
   const [isAddingJob, setIsAddingJob] = useState(false);
   const user = useSelector((state) => state.auth.user);
-  const userId = user.user_id;
+  const userId = user?.user_id;
 
   useEffect(() => {
     // Fetch job listings based on the active tab
@@ -39,7 +39,7 @@ const Jobs = () => {
     };
 
     fetchJobs();
-  }, [activeTab,jobListings]); // Re-run when activeTab changes
+  }, [activeTab]); // Only re-run when activeTab changes
 
   const handleAddJob = async (newJob) => {
     try {

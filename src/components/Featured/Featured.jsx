@@ -64,11 +64,12 @@ export default function FeaturedProfile() {
             params: { user_id: currentUserId },
           });
 
-          // Filter out past events based on the current date
+          // Filter and sort events
           const now = new Date();
-          const upcoming = response.data.filter(
-            (event) => new Date(event.start_time) > now
-          );
+          const upcoming = response.data
+            .filter((event) => new Date(event.start_time) > now) // Filter past events
+            .sort((a, b) => new Date(a.start_time) - new Date(b.start_time)); // Sort by date
+
           setUpcomingEvents(upcoming);
         } catch (error) {
           console.error("Error fetching upcoming events:", error);
@@ -82,6 +83,7 @@ export default function FeaturedProfile() {
   }, [isLoggedIn, currentUserId]);
 
   if (!isLoggedIn) return null;
+
 
   return (
     <div className="w-3/12 bg-white p-5 shadow-md h-full">

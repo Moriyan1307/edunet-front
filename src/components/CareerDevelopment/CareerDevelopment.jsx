@@ -49,7 +49,7 @@ const CareerDevelopment = () => {
             onClick={() => handleArticleClick(article)}
           >
             <img
-              src={""}
+              src={article.image_url}
               className="w-24 h-24 object-cover rounded-lg"
               onError={(e) => (e.target.src = placeholderImage)}
               alt={article.title}

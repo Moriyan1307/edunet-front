@@ -1,9 +1,3 @@
-// Name - Usha Sai Chintha, UTA ID - 1002155333
-// Name - Shiney Chinthamalla, UTA ID - 1002170536
-// Name - Sai Charan Challa, UTA ID - 1002147720
-// Name - Venkata Satya Kiranmai Challagulla, UTA ID - 1002195499
-// Name - Dinesh Reddy Bommana, UTA ID - 1002163421
-
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -15,19 +9,19 @@ export default function Posts() {
   const [newPostContent, setNewPostContent] = useState("");
 
   const user = useSelector((state) => state.auth.user);
-  const userId = user.user_id;
+  const userId = user?.user_id;
 
   // Fetch posts
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await axiosInstance.get("/api/posts");
-        setPosts(response.data); // Assuming the API response has the posts array in the data property
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-      }
-    };
+  const fetchPosts = async () => {
+    try {
+      const response = await axiosInstance.get("/api/posts");
+      setPosts(response.data); // Assuming the API response has the posts array in the data property
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchPosts();
   }, []);
 
@@ -35,14 +29,14 @@ export default function Posts() {
   const handlePostSubmit = async () => {
     try {
       const response = await axiosInstance.post("/api/posts", {
-        user_id: userId, // Replace userId with the actual user ID
+        user_id: userId,
         content: newPostContent,
       });
 
       if (response.status === 201) {
         setNewPostContent(""); // Clear the input
-        const newPost = response.data;
-        setPosts((prevPosts) => [newPost, ...prevPosts]);
+        // Fetch the updated list of posts after adding the new post
+        await fetchPosts();
       }
     } catch (error) {
       console.error("Error creating post:", error);
