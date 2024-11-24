@@ -27,19 +27,19 @@ Link to frontend of web app: [http://localhost:3000](http://localhost:3000)
 
 #### Student Credentials:
 
-USERNAME: sample@gmail.com
+USERNAME: vkc5499@mavs.uta.edu
 
 PASSWORD: password
 
 #### Alumni Credentials:
 
-USERNAME: aa@uta.com
+USERNAME: nina.adams@gmail.com
 
 PASSWORD: password
 
 #### Mentor Credentials:
 
-USERNAME: sxc0537@mavs.uta.edu
+USERNAME: uxc5333@mavs.uta.edu
 
 PASSWORD: password
 
