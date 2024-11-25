@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../../utils/axiosInstance";
 import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation"; // For Next.js routing
 
 const ForumDetails = ({ forumId }) => {
   const [forum, setForum] = useState(null);
@@ -16,6 +17,7 @@ const ForumDetails = ({ forumId }) => {
 
   const user = useSelector((state) => state.auth.user);
   const userId = user?.user_id;
+  const router = useRouter(); // Initialize the router hook
 
   useEffect(() => {
     const fetchForumDetails = async () => {
@@ -60,6 +62,13 @@ const ForumDetails = ({ forumId }) => {
 
   return (
     <div className="container mx-auto px-6 py-8">
+      <button
+        onClick={() => router.back()} // Use the back function from useRouter
+        className="mb-4 bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300"
+      >
+        Back
+      </button>
+
       {forum && (
         <>
           <h2 className="text-3xl font-semibold mb-4">{forum.title}</h2>
